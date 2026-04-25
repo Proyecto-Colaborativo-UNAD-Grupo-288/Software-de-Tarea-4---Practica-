@@ -3,8 +3,8 @@
 # Software-de-Tarea-4---Practica-
 Espacio de trabajo destinado para el desarrollo de la tarea 4, practicas simuladas.
 
-Contribuir de manera ordenada, asegurarse de que halla cohesión, no eliminar partes funcionales, trabajar sobre el esqueleto ya desarrollado
-Modificaciones para hacer el programa mas eficiente son bienvenidad, bugs dejar resaltados en comentarios y siempre explicar lo que se hizo 
+Contribuir de manera ordenada, asegurarse de que halla cohesión, no eliminar partes funcionales, trabajar sobre el esqueleto ya desarrollado, 
+Modificaciones para hacer el programa mas eficiente son bienvenidas, bugs dejar resaltados en comentarios y siempre explicar lo que se hizo 
 en el menzaje de commit
 
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠉⠉⠉⠉⠉⠉⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
