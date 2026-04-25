@@ -8,6 +8,7 @@
 # 
 # Miembros de equipo de trabajo: 
 # 1. David Andrés Gómez Castillo - 1.122.141.463
+# 2. Uvier Asdrubal Salinas Losada - 1.083.867.220
 # ============================================
 
 from abc import ABC, abstractmethod
