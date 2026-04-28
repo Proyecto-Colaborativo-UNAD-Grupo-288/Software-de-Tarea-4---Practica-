@@ -2,7 +2,7 @@
 # SOFTWARE FJ - TRABAJO COLABORATIVO
 # TAREA 4 - PRÁCTICA DE PROGRAMACIÓN 
 #
-#git 
+#
 # POR FAVOR DESARROLLAR LA ESTRUCTURA PROPUESTA Y COMPLETAR LOS MÓDULOS CON LAS FUNCIONALIDADES REQUERIDAS
 # INCLUYENDO VALIDACIONES, MANEJO DE EXCEPCIONES Y LOGGING ADECUADO.    
 # 
@@ -93,7 +93,7 @@ class BaseEntity(ABC):
         return self._id
 
 # ============================================
-# CLASE CLIENTE
+# CLASE CLIENTE  (W.I.P David Gómez)
 # ============================================
 
 class Cliente(BaseEntity):
@@ -128,6 +128,34 @@ class Cliente(BaseEntity):
     def email(self, value):
         validate_string(value, "Email")
         self._email = value
+
+# ============================================
+# GESTIÓN DE CLIENTES
+# ============================================
+
+clientes = []
+
+def register_client(id, name, email):
+    """
+    Registrar un nuevo cliente en el sistema
+
+    Maneja validaciones, errores y logging
+    """
+
+    try:
+        cliente = Cliente(id, name, email)
+        clientes.append(cliente)
+
+        log_info(f"Client registered: {name}")
+        return cliente
+
+    except ValidationError as e:
+        log_error(f"Validation error: {str(e)}")
+        raise
+
+    except Exception as e:
+        log_error(f"Unexpected error: {str(e)}")
+        raise
 
 # ============================================
 # CLASE ABSTRACTA SERVICIO
@@ -167,7 +195,6 @@ class Sala(Servicio):
 
     def calculate_cost(self, hours):
         validate_positive(hours, "Hours")
-        # TODO (Equipo): extender lógica de cálculo
         return self._base_price * hours
 
     def describe(self):
@@ -178,7 +205,6 @@ class Equipo(Servicio):
 
     def calculate_cost(self, days):
         validate_positive(days, "Days")
-        # TODO (Equipo): extender lógica de cálculo
         return self._base_price * days
 
     def describe(self):
@@ -189,7 +215,6 @@ class Asesoria(Servicio):
 
     def calculate_cost(self, sessions):
         validate_positive(sessions, "Sessions")
-        # TODO (Equipo): extender lógica de cálculo
         return self._base_price * sessions
 
     def describe(self):
@@ -269,15 +294,17 @@ class App:
         btn_reservations.pack(pady=5)
 
     def manage_clients(self):
-        # TODO (Equipo): desarrollar módulo de clientes
-        messagebox.showinfo("Info", "Clients module not implemented yet")
+        try:
+            cliente = register_client(1, "Test User", "test@mail.com")
+            messagebox.showinfo("Success", f"Client created: {cliente.name}")
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
     def manage_services(self):
-        # TODO (Equipo): desarrollar módulo de servicios
         messagebox.showinfo("Info", "Services module not implemented yet")
 
     def manage_reservations(self):
-        # TODO (Equipo): desarrollar módulo de reservas
         messagebox.showinfo("Info", "Reservations module not implemented yet")
 
 # ============================================
