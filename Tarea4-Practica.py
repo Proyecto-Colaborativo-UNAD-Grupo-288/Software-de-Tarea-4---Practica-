@@ -68,13 +68,11 @@ class ReservationError(SystemError):
 
 def validate_string(value, field):
     """Validar que un campo sea string no vacío"""
-    # TODO (Equipo): agregar validaciones más estrictas (correo válido, longitud, etc.)
     if not isinstance(value, str) or not value.strip():
         raise ValidationError(f"{field} must be a non-empty string")
 
 def validate_positive(value, field):
     """Validar que un valor sea positivo"""
-    # TODO (Equipo): ampliar validaciones si es necesario
     if not isinstance(value, (int, float)) or value <= 0:
         raise ValidationError(f"{field} must be positive")
 
@@ -97,15 +95,6 @@ class BaseEntity(ABC):
 # ============================================
 
 class Cliente(BaseEntity):
-    """
-    Representa un cliente del sistema
-
-    TODO (Equipo):
-    - Agregar más atributos (telefono, edad, etc.)
-    - Implementar validaciones más estrictas
-    - Aplicar encapsulación completa
-    """
-
     def __init__(self, id, name, email):
         super().__init__(id)
         self.name = name
@@ -135,14 +124,24 @@ class Cliente(BaseEntity):
 
 clientes = []
 
+def find_client_by_id(client_id):
+    """Buscar cliente por ID"""
+    for c in clientes:
+        if c.id == client_id:
+            return c
+    return None
+
+
+def list_clients():
+    """Retornar lista de clientes"""
+    return clientes
+
+
 def register_client(id, name, email):
-    """
-    Registrar un nuevo cliente en el sistema
-
-    Maneja validaciones, errores y logging
-    """
-
     try:
+        if find_client_by_id(id):
+            raise ValidationError("Client ID already exists")
+
         cliente = Cliente(id, name, email)
         clientes.append(cliente)
 
@@ -162,15 +161,6 @@ def register_client(id, name, email):
 # ============================================
 
 class Servicio(BaseEntity, ABC):
-    """
-    Clase abstracta que representa un servicio
-
-    TODO (Equipo):
-    - Definir atributos comunes adicionales
-    - Mejorar encapsulación
-    - Validar parámetros de entrada
-    """
-
     def __init__(self, id, name, base_price):
         super().__init__(id)
         self._name = name
@@ -178,12 +168,10 @@ class Servicio(BaseEntity, ABC):
 
     @abstractmethod
     def calculate_cost(self, duration):
-        """Calcular costo del servicio"""
         pass
 
     @abstractmethod
     def describe(self):
-        """Describir servicio"""
         pass
 
 # ============================================
@@ -191,8 +179,6 @@ class Servicio(BaseEntity, ABC):
 # ============================================
 
 class Sala(Servicio):
-    """Servicio de reserva de salas"""
-
     def calculate_cost(self, hours):
         validate_positive(hours, "Hours")
         return self._base_price * hours
@@ -201,8 +187,6 @@ class Sala(Servicio):
         return f"Room Service: {self._name}"
 
 class Equipo(Servicio):
-    """Servicio de alquiler de equipos"""
-
     def calculate_cost(self, days):
         validate_positive(days, "Days")
         return self._base_price * days
@@ -211,8 +195,6 @@ class Equipo(Servicio):
         return f"Equipment Service: {self._name}"
 
 class Asesoria(Servicio):
-    """Servicio de asesoría"""
-
     def calculate_cost(self, sessions):
         validate_positive(sessions, "Sessions")
         return self._base_price * sessions
@@ -225,15 +207,6 @@ class Asesoria(Servicio):
 # ============================================
 
 class Reserva:
-    """
-    Representa una reserva en el sistema
-
-    TODO (Equipo):
-    - Validar transiciones de estado
-    - Integrar logs en cada operación
-    - Manejar excepciones avanzadas
-    """
-
     def __init__(self, cliente, servicio, duration):
         self._cliente = cliente
         self._servicio = servicio
@@ -262,16 +235,6 @@ class Reserva:
 # ============================================
 
 class App:
-    """
-    Interfaz gráfica principal del sistema
-
-    TODO (Equipo):
-    - Implementar formulario de creación de clientes
-    - Implementar gestión de servicios
-    - Implementar creación y gestión de reservas
-    - Mostrar resultados y errores en la interfaz
-    """
-
     def __init__(self, root):
         self.root = root
         self.root.title("Software FJ System")
@@ -279,8 +242,6 @@ class App:
         self.build_main_window()
 
     def build_main_window(self):
-        """Construcción de la ventana principal"""
-
         title = tk.Label(self.root, text="Software FJ Management System", font=("Arial", 16))
         title.pack(pady=10)
 
@@ -295,8 +256,11 @@ class App:
 
     def manage_clients(self):
         try:
-            cliente = register_client(1, "Test User", "test@mail.com")
-            messagebox.showinfo("Success", f"Client created: {cliente.name}")
+            cliente = register_client(len(clientes)+1, f"User {len(clientes)+1}", "mail@test.com")
+
+            all_clients = "\n".join([f"{c.id} - {c.name}" for c in list_clients()])
+
+            messagebox.showinfo("Clients", f"Client created:\n{cliente.name}\n\nAll clients:\n{all_clients}")
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
@@ -312,15 +276,6 @@ class App:
 # ============================================
 
 def main():
-    """
-    Punto de entrada del sistema
-
-    TODO (Equipo):
-    - Implementar mínimo 10 operaciones (válidas e inválidas)
-    - Garantizar continuidad del sistema ante errores
-    - Integrar logging en toda la ejecución
-    """
-
     root = tk.Tk()
     app = App(root)
     root.mainloop()
