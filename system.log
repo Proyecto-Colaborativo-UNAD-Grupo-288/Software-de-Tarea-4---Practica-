@@ -3,4 +3,27 @@
 2026-04-28 16:57:44,237 - INFO - Client registered: User 1
 2026-04-28 16:58:00,285 - INFO - Client registered: User 2
 2026-04-28 16:58:07,792 - INFO - Client registered: User 3
+<<<<<<< HEAD
 2026-04-29 16:00:58,820 - INFO - Client registered: User 1
+=======
+2026-04-29 12:52:49,196 - INFO - Client registered: User 1
+2026-04-29 12:54:54,164 - INFO - Client registered: User 2
+2026-04-29 12:55:04,807 - INFO - Client registered: User 3
+2026-04-29 13:20:30,460 - INFO - Client nestor registered.
+2026-04-29 13:21:00,472 - INFO - Res 1 created for nestor
+2026-04-29 13:27:58,610 - INFO - Client registered: User 1
+2026-04-29 13:28:05,342 - INFO - Client registered: User 2
+2026-04-29 13:28:08,342 - INFO - Client registered: User 3
+2026-04-29 13:34:14,131 - ERROR - Error: Name too short
+2026-04-29 13:53:57,376 - ERROR - Error: Invalid email format
+2026-04-29 13:54:03,605 - ERROR - Error: Name too short
+2026-04-29 13:54:17,406 - INFO - Client nestor registered.
+2026-04-29 13:55:24,601 - INFO - Client nestor registered.
+2026-04-29 13:55:41,489 - INFO - Res 1 created for nestor
+2026-04-29 14:14:59,010 - INFO - Client nestor registered.
+2026-04-29 14:15:21,797 - INFO - Res ID 1 created for nestor
+2026-04-29 14:20:21,026 - ERROR - Error: Name too short
+2026-04-29 14:20:32,643 - INFO - Client nestor registered.
+2026-04-29 14:20:47,070 - INFO - Res ID 1 created for nestor
+2026-04-29 14:20:58,862 - INFO - Res ID 2 created for nestor
+>>>>>>> origin/tarea-nestor

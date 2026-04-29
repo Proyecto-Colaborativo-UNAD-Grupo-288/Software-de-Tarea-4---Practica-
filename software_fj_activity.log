@@ -1,0 +1,10 @@
+2026-04-29 13:01:04,697 - WARNING - Fallo registro cliente: El nombre debe tener al menos 3 caracteres.
+2026-04-29 13:01:04,698 - WARNING - Fallo registro cliente: Correo inválido: correo_sin_arroba
+2026-04-29 13:01:04,699 - INFO - Reserva Confirmada - Cliente: Nestor Lopez - Costo: 178.5
+2026-04-29 13:01:04,700 - ERROR - Error de Negocio: La duración debe ser mayor a cero.
+2026-04-29 13:01:04,701 - INFO - Reserva Confirmada - Cliente: Nestor Lopez - Costo: 238.0
+2026-04-29 13:03:39,352 - ERROR - Error de validación: Formato de correo incorrecto: nestorlope
+2026-04-29 13:03:51,603 - INFO - Cliente registrado con éxito: nestor
+2026-04-29 13:08:28,743 - INFO - Cliente creado: nestor
+2026-04-29 13:09:06,301 - INFO - Reserva 1 creada para nestor
+2026-04-29 13:14:42,039 - INFO - Reserva 2 creada para nestor
