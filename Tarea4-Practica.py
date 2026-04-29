@@ -191,16 +191,12 @@ class Reserva:
         Implementa el manejo de excepciones para garantizar estabilidad.
         """
         try:
-            # Polimorfismo: llama al método del servicio correspondiente
             cost = self._servicio.calculate_cost(self._duration)
             return cost
         except Exception as e:
-            # Registro de errores en archivo de logs
             log_error(f"Error processing reservation {self.id_reserva}: {e}")
             raise ReservationError("Processing failed") from e
     
-      
-
 # ============================================
 # INTERFAZ GRÁFICA (TKINTER)
 # ============================================
@@ -211,7 +207,6 @@ class App:
         self.root.title("Software FJ System")
         self.root.geometry("650x400")
         
-        # Listas internas (Requisito: Sin Base de Datos)
         self.clientes = []
         self.servicios = [
             Sala("S1", "Meeting Room A", 50.0),
@@ -234,7 +229,6 @@ class App:
         tk.Button(self.root, text="Manage Services", width=25, command=self.manage_services).pack(pady=10)
         tk.Button(self.root, text="Manage Reservations", width=25, command=self.manage_reservations).pack(pady=10)
 
-    # --- MÓDULO CLIENTES ---
     def manage_clients(self):
         self.clear_screen()
         tk.Label(self.root, text="Client Administration", font=("Arial", 12, "bold")).pack(pady=10)
@@ -267,7 +261,6 @@ class App:
 
         tk.Button(self.root, text="Back", command=self.build_main_window).pack()
 
-    # --- MÓDULO SERVICIOS ---
     def manage_services(self):
         self.clear_screen()
         tk.Label(self.root, text="Available Services", font=("Arial", 12, "bold")).pack(pady=10)
@@ -281,7 +274,6 @@ class App:
 
         tk.Button(self.root, text="Back", pady=10, command=self.build_main_window).pack()
 
-    # --- MÓDULO RESERVAS ---
     def manage_reservations(self):
         self.clear_screen()
         tk.Label(self.root, text="Reservation Management", font=("Arial", 12, "bold")).pack(pady=10)
@@ -306,25 +298,37 @@ class App:
 
         def make_res():
             try:
+                if cb_cli.current() == -1 or cb_ser.current() == -1:
+                    raise ValidationError("Select client and service")
+
+                if not ent_dur.get():
+                    raise ValidationError("Duration required")
+
+                dur = float(ent_dur.get())
+                validate_positive(dur, "Duration")
+
                 cli = self.clientes[cb_cli.current()]
                 ser = self.servicios[cb_ser.current()]
-                dur = float(ent_dur.get())
-                
-                # Se crea la instancia de la clase Reserva
+
                 res = Reserva(len(self.reservas)+1, cli, ser, dur)
-                
-                # Se llama al método process() que acabamos de mover a la clase
-                cost = res.process() 
-                
-                self.reservas.append(res)
-                messagebox.showinfo("Confirmed", f"Reservation Successful!\nTotal Cost: ${cost}")
-                log_info(f"Res ID {res.id_reserva} created for {cli.name}")
-                self.manage_reservations()
-                
+                cost = res.process()
+
+            except ValidationError as e:
+                log_error(f"Validation error: {e}")
+                messagebox.showerror("Validation Error", str(e))
+
             except Exception as e:
                 log_error(f"Reservation failure: {e}")
                 messagebox.showerror("Error", f"Could not process reservation: {str(e)}")
 
+            else:
+                self.reservas.append(res)
+                messagebox.showinfo("Confirmed", f"Reservation Successful!\nTotal Cost: ${cost}")
+                log_info(f"Res ID {res.id_reserva} created for {cli.name}")
+                self.manage_reservations()
+
+            finally:
+                ent_dur.delete(0, tk.END)
 
         tk.Button(self.root, text="Create Reservation", command=make_res).pack(pady=5)
         
