@@ -47,3 +47,13 @@
 2026-04-30 15:14:20,016 - INFO - Reservation 1 successful. Cost: 1800.0
 2026-04-30 15:14:20,017 - INFO - Reservation 1 processed
 2026-04-30 15:14:21,782 - INFO - Res ID 1 created for john connor
+2026-04-30 15:18:32,925 - WARNING - Attempt to create reservation without clients
+2026-04-30 15:18:52,188 - INFO - Client John registered.
+2026-04-30 15:19:11,597 - INFO - Service John  (ID: 4) added.
+2026-04-30 15:48:19,467 - WARNING - Attempt to create reservation without clients
+2026-04-30 16:03:40,321 - INFO - Client David registered.
+2026-04-30 16:04:16,098 - INFO - Service Drinks (ID: 4) added.
+2026-04-30 16:04:36,444 - INFO - Reservation 1 confirmed
+2026-04-30 16:04:36,444 - INFO - Reservation 1 successful. Cost: 405.0
+2026-04-30 16:04:36,444 - INFO - Reservation 1 processed
+2026-04-30 16:04:42,365 - INFO - Res ID 1 created for David
