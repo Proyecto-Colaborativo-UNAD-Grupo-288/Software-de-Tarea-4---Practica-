@@ -40,3 +40,10 @@
 2026-04-29 20:16:29,946 - ERROR - Error: Invalid email format
 2026-04-29 20:16:35,389 - INFO - Client asfasfasf registered.
 2026-04-29 20:48:02,859 - WARNING - Attempt to create reservation without clients
+2026-04-30 15:13:28,038 - ERROR - Error: Invalid email format
+2026-04-30 15:13:34,826 - INFO - Client john connor registered.
+2026-04-30 15:14:04,596 - INFO - Service Cocktail service (ID: 4) added.
+2026-04-30 15:14:20,016 - INFO - Reservation 1 confirmed
+2026-04-30 15:14:20,016 - INFO - Reservation 1 successful. Cost: 1800.0
+2026-04-30 15:14:20,017 - INFO - Reservation 1 processed
+2026-04-30 15:14:21,782 - INFO - Res ID 1 created for john connor

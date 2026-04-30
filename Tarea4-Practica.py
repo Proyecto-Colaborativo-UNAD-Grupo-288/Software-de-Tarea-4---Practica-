@@ -205,14 +205,24 @@ class Reserva:
         if self._status != STATUS_PENDING:
             raise ReservationError("Invalid state transition")
         self._status = STATUS_CONFIRMED
+        log_info(f"Reservation {self.id_reserva} confirmed")
 
     def cancel(self):
         if self._status == STATUS_CANCELLED:
             raise ReservationError("Already cancelled")
+        if self._status == STATUS_CONFIRMED:
+            raise ReservationError("Cannot cancel a confirmed reservation")
         self._status = STATUS_CANCELLED
+        log_warning(f"Reservation {self.id_reserva} cancelled")
 
     def process(self):
         try:
+            if self._status == STATUS_CANCELLED:
+                raise ReservationError("Cannot process a cancelled reservation")
+
+            if self._status == STATUS_CONFIRMED:
+                raise ReservationError("Reservation already processed")
+
             cost = self._servicio.calculate_total(self._duration, discount=0.1)
         
         except ValidationError as e:
@@ -224,6 +234,7 @@ class Reserva:
             raise ReservationError("Processing failed") from e
 
         else:
+            self.confirm()
             log_info(f"Reservation {self.id_reserva} successful. Cost: {cost}")
             return cost
 
