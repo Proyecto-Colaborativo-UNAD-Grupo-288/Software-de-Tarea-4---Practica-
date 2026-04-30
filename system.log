@@ -29,3 +29,10 @@
 >>>>>>> origin/tarea-nestor
 2026-04-29 16:33:52,130 - INFO - Client John registered.
 2026-04-29 16:34:19,297 - INFO - Res ID 1 created for John
+2026-04-29 16:30:48,681 - INFO - Client Nestor registered.
+2026-04-29 16:31:15,304 - INFO - Res ID 1 created for Nestor
+2026-04-29 17:54:50,190 - INFO - Service Salon grande (ID: 4) added.
+2026-04-29 17:55:16,171 - INFO - Service taladro (ID: 5) added.
+2026-04-29 17:58:01,089 - INFO - Service sala5 (ID: 4) added.
+2026-04-29 17:58:19,568 - INFO - Service taladro (ID: 5) added.
+2026-04-29 17:58:34,488 - INFO - Service contabilidad (ID: 6) added.
