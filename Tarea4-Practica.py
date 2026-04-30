@@ -279,7 +279,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Software FJ System")
-        self.root.geometry("860x600")
+        self.root.geometry("950x600")
         self.root.minsize(800, 550)
         self.root.configure(bg=COLORS["bg"])
 
@@ -675,22 +675,27 @@ class App:
     # SERVICES
     # ------------------------------------------------------------------
 
+
     def manage_services(self):
         self.clear_screen()
 
         self._make_header(self.root, "🛠  Service Management",
-                          "Add new services and review the active catalogue")
+                          "Add, edit or remove services from the active catalogue")
 
         body = tk.Frame(self.root, bg=COLORS["bg"])
         body.pack(fill="both", expand=True, padx=28, pady=16)
 
-        # izq:  card
+        # Variable de control para edición (encapsulada en la instancia de App)
+        if not hasattr(self, '_editing_service_id'):
+            self._editing_service_id = None
+
+        # --- PANEL IZQUIERDO: FORMULARIO ---
         form_card = self._make_card(body)
         form_card.pack(side="left", fill="y", padx=(0, 12))
 
-        tk.Label(form_card, text="ADD SERVICE", font=("Segoe UI", 8, "bold"),
-                 bg=COLORS["surface"], fg=COLORS["text_dim"]).grid(
-                     row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
+        lbl_form = tk.Label(form_card, text="SERVICE DETAILS", font=("Segoe UI", 8, "bold"),
+                          bg=COLORS["surface"], fg=COLORS["text_dim"])
+        lbl_form.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
 
         ent_sname  = self._make_entry(form_card,   "Service Name", row=1)
         ent_sprice = self._make_entry(form_card,   "Base Price ($)", row=2)
@@ -699,34 +704,83 @@ class App:
 
         form_card.columnconfigure(1, weight=1)
 
-        def add_service():
+        # --- LÓGICA DE PERSISTENCIA ---
+        def save_service():
             try:
                 name = ent_sname.get()
                 price = validate_positive(ent_sprice.get(), "Base Price")
                 stype = cb_stype.get()
                 
-                new_id = len(self.servicios) + 1
-                
-                if stype == "Room":
-                    s = Sala(new_id, name, price)
-                elif stype == "Equipment":
-                    s = Equipo(new_id, name, price)
+                if self._editing_service_id is None:
+                    # MODO CREACIÓN: ID numeral auto-incrementable
+                    new_id = str(len(self.servicios) + 1)
+                    if stype == "Room": s = Sala(new_id, name, price)
+                    elif stype == "Equipment": s = Equipo(new_id, name, price)
+                    else: s = Asesoria(new_id, name, price)
+                    
+                    self.servicios.append(s)
+                    log_info(f"Service {name} created with ID {new_id}.")
+                    messagebox.showinfo("Success", "Service created successfully.")
                 else:
-                    s = Asesoria(new_id, name, price)
+                    # MODO EDICIÓN: Mantener ID, actualizar instancia (Polimorfismo)
+                    for i, s in enumerate(self.servicios):
+                        if s.id == self._editing_service_id:
+                            if stype == "Room": updated = Sala(s.id, name, price)
+                            elif stype == "Equipment": updated = Equipo(s.id, name, price)
+                            else: updated = Asesoria(s.id, name, price)
+                            
+                            self.servicios[i] = updated
+                            break
+                    log_info(f"Service ID {self._editing_service_id} updated.")
+                    messagebox.showinfo("Success", "Service updated successfully.")
+                    self._editing_service_id = None
                 
-                self.servicios.append(s)
-                log_info(f"Service {name} (ID: {new_id}) added.")
-                messagebox.showinfo("Success", "Service added successfully.")
                 self.manage_services()
                 
             except Exception as e:
-                log_error(f"Error adding service: {e}")
+                log_error(f"Service operation failed: {e}")
                 messagebox.showerror("Error", str(e))
 
-        self._make_button(form_card, "Add Service", add_service, style="primary", width=22).grid(
-            row=4, column=0, columnspan=2, pady=(14, 0), sticky="ew")
+        def delete_service():
+            selected = tree.selection()
+            if not selected:
+                messagebox.showwarning("Selection", "Please select a service to delete.")
+                return
+            
+            item = tree.item(selected)
+            s_id = str(item['values'][0])
+            
+            if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete service ID {s_id}?"):
+                self.servicios = [s for s in self.servicios if str(s.id) != s_id]
+                log_info(f"Service ID {s_id} removed from catalogue.")
+                self.manage_services()
 
-        # der: vista de arbol     lista
+        def load_for_edit(event):
+            selected = tree.selection()
+            if not selected: return
+            
+            item = tree.item(selected)
+            self._editing_service_id = str(item['values'][0])
+            
+            # Cargar datos en el formulario
+            ent_sname.delete(0, tk.END); ent_sname.insert(0, item['values'][1])
+            ent_sprice.delete(0, tk.END); ent_sprice.insert(0, str(item['values'][2]).replace('$', ''))
+            
+            # Mapear el tipo visual al valor del combobox
+            raw_type = item['values'][3].split()[-1] # Extrae "Room" de "🏢 Room"
+            cb_stype.set(raw_type)
+            
+            btn_save.config(text="Update Service", bg=COLORS["accent2"])
+            lbl_form.config(text=f"EDITING ID: {self._editing_service_id}", fg=COLORS["accent"])
+
+        # --- BOTONES ---
+        btn_save = self._make_button(form_card, "Add Service", save_service, style="primary", width=22)
+        btn_save.grid(row=4, column=0, columnspan=2, pady=(14, 0), sticky="ew")
+
+        self._make_button(form_card, "Delete Selected", delete_service, style="danger", width=22).grid(
+            row=5, column=0, columnspan=2, pady=(8, 0), sticky="ew")
+
+        # --- PANEL DERECHO: VISTA DE CATÁLOGO ---
         list_card = tk.Frame(body, bg=COLORS["surface"], padx=16, pady=16)
         list_card.pack(side="left", fill="both", expand=True)
 
@@ -739,9 +793,11 @@ class App:
         cols   = ("ID", "Name", "Base Price", "Type")
         labels = ("ID", "Name", "Base Price / Unit", "Type")
         widths = [40, 190, 140, 130]
-        tree_frame, tree = self._make_treeview(
-            list_card, cols, labels, widths, height=10)
+        tree_frame, tree = self._make_treeview(list_card, cols, labels, widths, height=10)
         tree_frame.pack(fill="both", expand=True)
+
+        # Vincular selección para editar
+        tree.bind("<<TreeviewSelect>>", load_for_edit)
 
         for i, s in enumerate(self.servicios):
             tag = "even" if i % 2 == 0 else "odd"
@@ -750,7 +806,7 @@ class App:
                         values=(s.id, s.name, f"${s.base_price:.2f}", tipo),
                         tags=(tag,))
 
-        # final
+        # --- BARRA INFERIOR ---
         bottom = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
         bottom.pack(fill="x", padx=28)
         self._make_button(bottom, "← Back to Menu", self.build_main_window,

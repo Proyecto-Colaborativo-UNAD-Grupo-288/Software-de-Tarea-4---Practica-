@@ -60,3 +60,31 @@
 2026-04-30 17:27:12,853 - WARNING - Intento de login fallido.
 2026-04-30 17:27:27,608 - INFO - Login exitoso.
 2026-04-30 17:29:42,432 - INFO - Login exitoso.
+2026-04-30 17:13:11,522 - INFO - Login exitoso.
+2026-04-30 17:13:55,128 - INFO - Service taladro (ID: 4) added.
+2026-04-30 17:14:15,199 - INFO - Client nestor registered.
+2026-04-30 17:14:39,995 - INFO - Reservation 1 confirmed
+2026-04-30 17:14:39,995 - INFO - Reservation 1 successful. Cost: 90.0
+2026-04-30 17:14:39,995 - INFO - Reservation 1 processed
+2026-04-30 17:14:49,344 - INFO - Res ID 1 created for nestor
+2026-04-30 17:27:49,234 - INFO - Login exitoso.
+2026-04-30 17:33:19,757 - INFO - Login exitoso.
+2026-04-30 17:33:29,118 - INFO - Service ID 1 updated.
+2026-04-30 17:35:03,400 - INFO - Login exitoso.
+2026-04-30 17:35:36,375 - INFO - Login exitoso.
+2026-04-30 17:37:07,184 - INFO - Login exitoso.
+2026-04-30 17:37:41,926 - INFO - Login exitoso.
+2026-04-30 17:37:56,641 - INFO - Service ID 3 removed from catalogue.
+2026-04-30 17:38:09,778 - INFO - Service ID 1 updated.
+2026-04-30 17:38:25,115 - INFO - Service ID 1 updated.
+2026-04-30 17:38:47,513 - INFO - Service taladro created with ID 3.
+2026-04-30 17:38:59,987 - INFO - Service campana created with ID 4.
+2026-04-30 17:39:14,541 - INFO - Service fdsfasdfdsf created with ID 5.
+2026-04-30 17:39:17,915 - INFO - Service ID 5 updated.
+2026-04-30 17:39:39,466 - INFO - Service ID 5 updated.
+2026-04-30 17:39:49,782 - WARNING - Attempt to create reservation without clients
+2026-04-30 17:40:02,862 - INFO - Client nestor registered.
+2026-04-30 17:40:15,457 - INFO - Reservation 1 confirmed
+2026-04-30 17:40:15,458 - INFO - Reservation 1 successful. Cost: 18.0
+2026-04-30 17:40:15,458 - INFO - Reservation 1 processed
+2026-04-30 17:40:17,394 - INFO - Res ID 1 created for nestor
