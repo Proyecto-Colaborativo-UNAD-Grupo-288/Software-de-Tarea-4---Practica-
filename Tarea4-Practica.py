@@ -34,6 +34,7 @@ logging.basicConfig(
 
 def log_info(message): logging.info(message)
 def log_error(message): logging.error(message)
+def log_warning(message): logging.warning(message)
 
 # ============================================
 # EXCEPCIONES PERSONALIZADAS
@@ -61,8 +62,15 @@ def validate_string(value, field):
         raise ValidationError(f"{field} must be a non-empty string")
 
 def validate_positive(value, field):
-    if not isinstance(value, (int, float)) or value <= 0:
+    try:
+        value = float(value)
+    except:
+        raise ValidationError(f"{field} must be a number")
+
+    if value <= 0:
         raise ValidationError(f"{field} must be positive")
+    
+    return value
     
 # ============================================
 # CLASE BASE ABSTRACTA
@@ -70,6 +78,8 @@ def validate_positive(value, field):
 
 class BaseEntity(ABC):
     def __init__(self, id):
+        if id is None:
+            raise ValidationError("ID cannot be None")
         self._id = id
 
     @property
@@ -114,9 +124,8 @@ class Servicio(BaseEntity, ABC):
     def __init__(self, id, name, base_price):
         super().__init__(id)
 
-        # 🔹 VALIDACIÓN AÑADIDA
         validate_string(name, "Service Name")
-        validate_positive(base_price, "Base Price")
+        base_price = validate_positive(base_price, "Base Price")
 
         self._name = name
         self._base_price = base_price
@@ -129,7 +138,6 @@ class Servicio(BaseEntity, ABC):
     def base_price(self):
         return self._base_price
 
-    #  SOBRECARGA 
     def calculate_total(self, duration, discount=0.0, tax=0.0):
         base = self.calculate_cost(duration)
         return base - (base * discount) + (base * tax)
@@ -148,7 +156,7 @@ class Servicio(BaseEntity, ABC):
 
 class Sala(Servicio):
     def calculate_cost(self, hours):
-        validate_positive(hours, "Hours")
+        hours = validate_positive(hours, "Hours")
         return self._base_price * hours
     
     def describe(self):
@@ -156,7 +164,7 @@ class Sala(Servicio):
 
 class Equipo(Servicio):
     def calculate_cost(self, days):
-        validate_positive(days, "Days")
+        days = validate_positive(days, "Days")
         return self._base_price * days
     
     def describe(self): 
@@ -164,8 +172,9 @@ class Equipo(Servicio):
 
 class Asesoria(Servicio):
     def calculate_cost(self, sessions):
-        validate_positive(sessions, "Sessions")
+        sessions = validate_positive(sessions, "Sessions")
         return self._base_price * sessions
+    
     def describe(self): 
         return f"Consulting Service: {self._name}"
     
@@ -177,8 +186,13 @@ class Asesoria(Servicio):
 class Reserva:
     def __init__(self, id_reserva, cliente, servicio, duration):
 
-        #  VALIDACIÓN AÑADIDA (cambiar forma,)
-        validate_positive(duration, "Duration")
+        if not isinstance(cliente, Cliente):
+            raise ValidationError("Invalid client")
+
+        if not isinstance(servicio, Servicio):
+            raise ValidationError("Invalid service")
+
+        duration = validate_positive(duration, "Duration")
 
         self.id_reserva = id_reserva
         self._cliente = cliente
@@ -199,13 +213,20 @@ class Reserva:
 
     def process(self):
         try:
-            #
             cost = self._servicio.calculate_total(self._duration, discount=0.1)
+        
+        except ValidationError as e:
+            log_error(f"Validation error in reservation {self.id_reserva}: {e}")
+            raise
+
         except Exception as e:
-            log_error(f"Error processing reservation {self.id_reserva}: {e}")
+            log_error(f"Unexpected error in reservation {self.id_reserva}: {e}")
             raise ReservationError("Processing failed") from e
+
         else:
+            log_info(f"Reservation {self.id_reserva} successful. Cost: {cost}")
             return cost
+
         finally:
             log_info(f"Reservation {self.id_reserva} processed")
 
@@ -232,6 +253,18 @@ class App:
     def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
+
+    def get_cliente_by_name(self, name):
+        for c in self.clientes:
+            if c.name == name:
+                return c
+        raise ValidationError("Client not found")
+
+    def get_servicio_by_name(self, name):
+        for s in self.servicios:
+            if s.name == name:
+                return s
+        raise ValidationError("Service not found")
 
     def build_main_window(self):
         self.clear_screen()
@@ -272,9 +305,6 @@ class App:
         for c in self.clientes: lb.insert(tk.END, f"ID: {c.id} | {c.name} ({c.email})")
 
         tk.Button(self.root, text="Back", command=self.build_main_window).pack()
-        
-        # Optimizar aqui 
-
 
     def manage_services(self):
         self.clear_screen()
@@ -299,11 +329,8 @@ class App:
         def add_service():
             try:
                 name = ent_sname.get()
-                price = float(ent_sprice.get())
+                price = validate_positive(ent_sprice.get(), "Base Price")
                 stype = cb_stype.get()
-                
-                validate_string(name, "Service Name")
-                validate_positive(price, "Base Price")
                 
                 new_id = len(self.servicios) + 1
                 
@@ -316,7 +343,7 @@ class App:
                 
                 self.servicios.append(s)
                 log_info(f"Service {name} (ID: {new_id}) added.")
-                messagebox.showinfo("Success", "Service added correctly")    #optimizar 
+                messagebox.showinfo("Success", "Service added correctly")
                 self.manage_services()
                 
             except Exception as e:
@@ -347,6 +374,7 @@ class App:
         tk.Label(self.root, text="Reservation Management", font=("Arial", 12, "bold")).pack(pady=10)
 
         if not self.clientes:
+            log_warning("Attempt to create reservation without clients")
             messagebox.showwarning("Warning", "Please register a client first!")
             return self.build_main_window()
 
@@ -366,17 +394,13 @@ class App:
 
         def make_res():
             try:
-                if cb_cli.current() == -1 or cb_ser.current() == -1:
+                if not cb_cli.get() or not cb_ser.get():
                     raise ValidationError("Select client and service")
 
-                if not ent_dur.get():
-                    raise ValidationError("Duration required")
+                dur = validate_positive(ent_dur.get(), "Duration")
 
-                dur = float(ent_dur.get())
-                validate_positive(dur, "Duration")
-
-                cli = self.clientes[cb_cli.current()]
-                ser = self.servicios[cb_ser.current()]
+                cli = self.get_cliente_by_name(cb_cli.get())
+                ser = self.get_servicio_by_name(cb_ser.get())
 
                 res = Reserva(len(self.reservas)+1, cli, ser, dur)
                 cost = res.process()

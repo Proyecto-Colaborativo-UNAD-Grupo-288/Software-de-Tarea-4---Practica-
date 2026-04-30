@@ -39,3 +39,4 @@
 2026-04-29 20:16:23,608 - ERROR - Error: Email must be a non-empty string
 2026-04-29 20:16:29,946 - ERROR - Error: Invalid email format
 2026-04-29 20:16:35,389 - INFO - Client asfasfasf registered.
+2026-04-29 20:48:02,859 - WARNING - Attempt to create reservation without clients
