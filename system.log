@@ -60,3 +60,15 @@
 2026-04-30 17:27:12,853 - WARNING - Intento de login fallido.
 2026-04-30 17:27:27,608 - INFO - Login exitoso.
 2026-04-30 17:29:42,432 - INFO - Login exitoso.
+2026-04-30 18:33:13,368 - INFO - Login exitoso.
+2026-04-30 18:33:23,401 - INFO - Client david registered.
+2026-04-30 18:33:40,732 - INFO - Service escort girl (ID: 4) added.
+2026-04-30 18:33:54,775 - INFO - Reservation 1 confirmed
+2026-04-30 18:33:54,776 - INFO - Reservation 1 successful. Cost: 450.0
+2026-04-30 18:33:54,776 - INFO - Reservation 1 processing attempt finished
+2026-04-30 18:34:01,675 - INFO - Res ID 1 created for david
+2026-04-30 18:34:03,432 - ERROR - Validation error: Duration must be a number
+2026-04-30 18:34:08,508 - INFO - Reservation 2 confirmed
+2026-04-30 18:34:08,508 - INFO - Reservation 2 successful. Cost: 45.0
+2026-04-30 18:34:08,508 - INFO - Reservation 2 processing attempt finished
+2026-04-30 18:34:10,876 - INFO - Res ID 2 created for david
