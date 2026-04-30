@@ -124,6 +124,14 @@ class Servicio(BaseEntity, ABC):
         self._name = name
         self._base_price = base_price
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def base_price(self):
+        return self._base_price
+
     @abstractmethod
     def calculate_cost(self, duration): 
         pass
@@ -205,13 +213,13 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Software FJ System")
-        self.root.geometry("650x400")
+        self.root.geometry("750x500")
         
         self.clientes = []
         self.servicios = [
-            Sala("S1", "Meeting Room A", 50.0),
-            Equipo("E1", "Projector 4K", 25.0),
-            Asesoria("A1", "Java Specialist", 100.0)
+            Sala("1", "Meeting Room A", 50.0),
+            Equipo("2", "Projector 4K", 25.0),
+            Asesoria("3", "Java Specialist", 100.0)
         ]
         self.reservas = []
 
@@ -261,18 +269,79 @@ class App:
 
         tk.Button(self.root, text="Back", command=self.build_main_window).pack()
 
+
     def manage_services(self):
         self.clear_screen()
-        tk.Label(self.root, text="Available Services", font=("Arial", 12, "bold")).pack(pady=10)
+        tk.Label(self.root, text="Enabled Service Types", font=("Arial", 12, "bold")).pack(pady=10)
         
-        tree = ttk.Treeview(self.root, columns=("ID", "Name", "Price"), show='headings')
-        tree.heading("ID", text="ID"); tree.heading("Name", text="Name"); tree.heading("Price", text="Base Price")
-        tree.pack(padx=10)
+        # --- Formulario para agregar nuevos servicios ---
+        form = tk.Frame(self.root)
+        form.pack(pady=10)
+
+        tk.Label(form, text="Name:").grid(row=0, column=0)
+        ent_sname = tk.Entry(form)
+        ent_sname.grid(row=0, column=1)
+
+        tk.Label(form, text="Price:").grid(row=1, column=0)
+        ent_sprice = tk.Entry(form)
+        ent_sprice.grid(row=1, column=1)
+
+        tk.Label(form, text="Type:").grid(row=2, column=0)
+        cb_stype = ttk.Combobox(form, values=["Room", "Equipment", "Consulting"], state="readonly")
+        cb_stype.grid(row=2, column=1)
+        cb_stype.current(0)
+
+        def add_service():
+            try:
+                name = ent_sname.get()
+                price = float(ent_sprice.get())
+                stype = cb_stype.get()
+                
+                validate_string(name, "Service Name")
+                validate_positive(price, "Base Price")
+                
+                # ID numeral autoincrementable
+                new_id = len(self.servicios) + 1
+                
+                # Polimorfismo: creamos la instancia según la selección
+                if stype == "Room":
+                    s = Sala(new_id, name, price)
+                elif stype == "Equipment":
+                    s = Equipo(new_id, name, price)
+                else:
+                    s = Asesoria(new_id, name, price)
+                
+                self.servicios.append(s)
+                log_info(f"Service {name} (ID: {new_id}) added.")
+                messagebox.showinfo("Success", "Service added correctly")
+                self.manage_services() # Refrescar ventana
+                
+            except Exception as e:
+                log_error(f"Error adding service: {e}")
+                messagebox.showerror("Error", str(e))
+
+        tk.Button(self.root, text="Add Service", command=add_service).pack(pady=5)
+
+        # --- Tabla de visualización ---
+        # Cambio solicitado: "Base price per hour"
+        tree = ttk.Treeview(self.root, columns=("ID", "Name", "Price", "Type"), show='headings', height=5)
+        tree.heading("ID", text="ID")
+        tree.heading("Name", text="Name")
+        tree.heading("Price", text="Base price per hour")
+        tree.heading("Type", text="Type")
+        
+        # Ajustar ancho de columnas
+        tree.column("ID", width=50)
+        tree.column("Price", width=150)
+        tree.pack(padx=10, pady=10)
 
         for s in self.servicios:
-            tree.insert("", tk.END, values=(s.id, s._name, f"${s._base_price}"))
+            # Determinamos el tipo para mostrarlo en la tabla
+            tipo = s.__class__.__name__
+            tree.insert("", tk.END, values=(s.id, s.name, f"${s.base_price}", tipo))
 
-        tk.Button(self.root, text="Back", pady=10, command=self.build_main_window).pack()
+        tk.Button(self.root, text="Back", command=self.build_main_window).pack(pady=10)
+
 
     def manage_reservations(self):
         self.clear_screen()
