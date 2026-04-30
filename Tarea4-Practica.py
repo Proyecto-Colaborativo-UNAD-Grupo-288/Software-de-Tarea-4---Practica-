@@ -129,7 +129,7 @@ class Servicio(BaseEntity, ABC):
     def base_price(self):
         return self._base_price
 
-    # 🔹 SOBRECARGA (REQUISITO DEL TRABAJO)
+    #  SOBRECARGA 
     def calculate_total(self, duration, discount=0.0, tax=0.0):
         base = self.calculate_cost(duration)
         return base - (base * discount) + (base * tax)
@@ -177,7 +177,7 @@ class Asesoria(Servicio):
 class Reserva:
     def __init__(self, id_reserva, cliente, servicio, duration):
 
-        # 🔹 VALIDACIÓN AÑADIDA
+        #  VALIDACIÓN AÑADIDA (cambiar forma,)
         validate_positive(duration, "Duration")
 
         self.id_reserva = id_reserva
@@ -199,7 +199,7 @@ class Reserva:
 
     def process(self):
         try:
-            # 🔹 USO DE SOBRECARGA
+            #
             cost = self._servicio.calculate_total(self._duration, discount=0.1)
         except Exception as e:
             log_error(f"Error processing reservation {self.id_reserva}: {e}")
@@ -210,7 +210,7 @@ class Reserva:
             log_info(f"Reservation {self.id_reserva} processed")
 
 # ============================================
-# INTERFAZ GRÁFICA (TKINTER)
+# INTERFAZ GRÁFICA DE USUARIO 
 # ============================================
 
 class App:
@@ -272,6 +272,8 @@ class App:
         for c in self.clientes: lb.insert(tk.END, f"ID: {c.id} | {c.name} ({c.email})")
 
         tk.Button(self.root, text="Back", command=self.build_main_window).pack()
+        
+        # Optimizar aqui 
 
 
     def manage_services(self):
@@ -314,7 +316,7 @@ class App:
                 
                 self.servicios.append(s)
                 log_info(f"Service {name} (ID: {new_id}) added.")
-                messagebox.showinfo("Success", "Service added correctly")
+                messagebox.showinfo("Success", "Service added correctly")    #optimizar 
                 self.manage_services()
                 
             except Exception as e:
