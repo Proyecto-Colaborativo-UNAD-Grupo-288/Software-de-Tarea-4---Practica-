@@ -36,3 +36,6 @@
 2026-04-29 17:58:01,089 - INFO - Service sala5 (ID: 4) added.
 2026-04-29 17:58:19,568 - INFO - Service taladro (ID: 5) added.
 2026-04-29 17:58:34,488 - INFO - Service contabilidad (ID: 6) added.
+2026-04-29 20:16:23,608 - ERROR - Error: Email must be a non-empty string
+2026-04-29 20:16:29,946 - ERROR - Error: Invalid email format
+2026-04-29 20:16:35,389 - INFO - Client asfasfasf registered.

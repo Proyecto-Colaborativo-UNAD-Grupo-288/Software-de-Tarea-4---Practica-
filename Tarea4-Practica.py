@@ -40,19 +40,15 @@ def log_error(message): logging.error(message)
 # ============================================
 
 class SystemError(Exception):
-    """Excepción base del sistema"""
     pass
 
 class ValidationError(SystemError):
-    """Errores relacionados con validación de datos"""
     pass
 
 class ServiceError(SystemError):
-    """Errores relacionados con servicios"""
     pass
 
 class ReservationError(SystemError):
-    """Errores relacionados con reservas"""
     pass
 
 
@@ -61,12 +57,10 @@ class ReservationError(SystemError):
 # ============================================
 
 def validate_string(value, field):
-    """Validar que un campo sea string no vacío"""
     if not isinstance(value, str) or not value.strip():
         raise ValidationError(f"{field} must be a non-empty string")
 
 def validate_positive(value, field):
-    """Validar que un valor sea positivo"""
     if not isinstance(value, (int, float)) or value <= 0:
         raise ValidationError(f"{field} must be positive")
     
@@ -75,8 +69,6 @@ def validate_positive(value, field):
 # ============================================
 
 class BaseEntity(ABC):
-    """Clase base para todas las entidades del sistema"""
-
     def __init__(self, id):
         self._id = id
 
@@ -85,7 +77,7 @@ class BaseEntity(ABC):
         return self._id
 
 # ============================================
-# CLASE CLIENTE  (W.I.P David Gómez)
+# CLASE CLIENTE
 # ============================================
 
 class Cliente(BaseEntity):
@@ -121,6 +113,11 @@ class Cliente(BaseEntity):
 class Servicio(BaseEntity, ABC):
     def __init__(self, id, name, base_price):
         super().__init__(id)
+
+        # 🔹 VALIDACIÓN AÑADIDA
+        validate_string(name, "Service Name")
+        validate_positive(base_price, "Base Price")
+
         self._name = name
         self._base_price = base_price
 
@@ -131,6 +128,11 @@ class Servicio(BaseEntity, ABC):
     @property
     def base_price(self):
         return self._base_price
+
+    # 🔹 SOBRECARGA (REQUISITO DEL TRABAJO)
+    def calculate_total(self, duration, discount=0.0, tax=0.0):
+        base = self.calculate_cost(duration)
+        return base - (base * discount) + (base * tax)
 
     @abstractmethod
     def calculate_cost(self, duration): 
@@ -174,6 +176,10 @@ class Asesoria(Servicio):
 
 class Reserva:
     def __init__(self, id_reserva, cliente, servicio, duration):
+
+        # 🔹 VALIDACIÓN AÑADIDA
+        validate_positive(duration, "Duration")
+
         self.id_reserva = id_reserva
         self._cliente = cliente
         self._servicio = servicio
@@ -182,29 +188,27 @@ class Reserva:
         self._date = datetime.now()
 
     def confirm(self):
-        """Cambia el estado de la reserva a Confirmada"""
         if self._status != STATUS_PENDING:
             raise ReservationError("Invalid state transition")
         self._status = STATUS_CONFIRMED
 
     def cancel(self):
-        """Cambia el estado de la reserva a Cancelada"""
         if self._status == STATUS_CANCELLED:
             raise ReservationError("Already cancelled")
         self._status = STATUS_CANCELLED
 
     def process(self):
-        """
-        Calcula el costo del servicio asociado a la reserva.
-        Implementa el manejo de excepciones para garantizar estabilidad.
-        """
         try:
-            cost = self._servicio.calculate_cost(self._duration)
-            return cost
+            # 🔹 USO DE SOBRECARGA
+            cost = self._servicio.calculate_total(self._duration, discount=0.1)
         except Exception as e:
             log_error(f"Error processing reservation {self.id_reserva}: {e}")
             raise ReservationError("Processing failed") from e
-    
+        else:
+            return cost
+        finally:
+            log_info(f"Reservation {self.id_reserva} processed")
+
 # ============================================
 # INTERFAZ GRÁFICA (TKINTER)
 # ============================================
@@ -274,7 +278,6 @@ class App:
         self.clear_screen()
         tk.Label(self.root, text="Enabled Service Types", font=("Arial", 12, "bold")).pack(pady=10)
         
-        # --- Formulario para agregar nuevos servicios ---
         form = tk.Frame(self.root)
         form.pack(pady=10)
 
@@ -300,10 +303,8 @@ class App:
                 validate_string(name, "Service Name")
                 validate_positive(price, "Base Price")
                 
-                # ID numeral autoincrementable
                 new_id = len(self.servicios) + 1
                 
-                # Polimorfismo: creamos la instancia según la selección
                 if stype == "Room":
                     s = Sala(new_id, name, price)
                 elif stype == "Equipment":
@@ -314,7 +315,7 @@ class App:
                 self.servicios.append(s)
                 log_info(f"Service {name} (ID: {new_id}) added.")
                 messagebox.showinfo("Success", "Service added correctly")
-                self.manage_services() # Refrescar ventana
+                self.manage_services()
                 
             except Exception as e:
                 log_error(f"Error adding service: {e}")
@@ -322,21 +323,17 @@ class App:
 
         tk.Button(self.root, text="Add Service", command=add_service).pack(pady=5)
 
-        # --- Tabla de visualización ---
-        # Cambio solicitado: "Base price per hour"
         tree = ttk.Treeview(self.root, columns=("ID", "Name", "Price", "Type"), show='headings', height=5)
         tree.heading("ID", text="ID")
         tree.heading("Name", text="Name")
         tree.heading("Price", text="Base price per hour")
         tree.heading("Type", text="Type")
         
-        # Ajustar ancho de columnas
         tree.column("ID", width=50)
         tree.column("Price", width=150)
         tree.pack(padx=10, pady=10)
 
         for s in self.servicios:
-            # Determinamos el tipo para mostrarlo en la tabla
             tipo = s.__class__.__name__
             tree.insert("", tk.END, values=(s.id, s.name, f"${s.base_price}", tipo))
 
@@ -359,7 +356,7 @@ class App:
         cb_cli.grid(row=0, column=1)
 
         tk.Label(form, text="Service:").grid(row=1, column=0)
-        cb_ser = ttk.Combobox(form, values=[s._name for s in self.servicios])
+        cb_ser = ttk.Combobox(form, values=[s.name for s in self.servicios])
         cb_ser.grid(row=1, column=1)
 
         tk.Label(form, text="Duration:").grid(row=2, column=0)
@@ -403,7 +400,7 @@ class App:
         
         lb = tk.Listbox(self.root, width=50, height=5)
         lb.pack()
-        for r in self.reservas: lb.insert(tk.END, f"Res {r.id_reserva}: {r._cliente.name} - {r._servicio._name}")
+        for r in self.reservas: lb.insert(tk.END, f"Res {r.id_reserva}: {r._cliente.name} - {r._servicio.name}")
 
         tk.Button(self.root, text="Back", command=self.build_main_window).pack(pady=5)
 
