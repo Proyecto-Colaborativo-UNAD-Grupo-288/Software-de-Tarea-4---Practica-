@@ -544,7 +544,7 @@ class App:
             row=4, column=0, columnspan=2, pady=(16, 0), sticky="ew")
 
         # Pie de página con credenciales de demo
-        tk.Label(self.root, text="Demo: usuario = admin  |  contraseña = fj2024",
+        tk.Label(self.root, text="Demo: usuario = admin  |  contraseña = fj2026",
                  font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).place(
                      relx=0.5, rely=0.96, anchor="center")
 
