@@ -26,6 +26,10 @@ STATUS_PENDING = "Pending"
 STATUS_CONFIRMED = "Confirmed"
 STATUS_CANCELLED = "Cancelled"
 
+# Credenciales de acceso al sistema
+LOGIN_USER = "admin"
+LOGIN_PASS = "fj2026"
+
 logging.basicConfig(
     filename=LOG_FILE,
     level=logging.INFO,
@@ -290,7 +294,8 @@ class App:
         ]
         self.reservas = []
 
-        self.build_main_window()
+        # Mostrar pantalla de login al iniciar
+        self.build_login()
 
     # ------------------------------------------------------------------
     # ESTILOS
@@ -494,6 +499,54 @@ class App:
         tk.Label(f, text=label, font=FONTS["small"],
                  bg=COLORS["surface2"], fg=COLORS["text_dim"]).pack()
         return f
+
+    # ------------------------------------------------------------------
+    # LOGIN
+    # ------------------------------------------------------------------
+
+    def build_login(self):
+        """Pantalla de inicio de sesión. Solo con credenciales correctas se accede al sistema."""
+        self.clear_screen()
+        self._make_header(self.root, "🔐  Software FJ", "Acceso al sistema — ingrese sus credenciales")
+
+        # Card centrada
+        card = tk.Frame(self.root, bg=COLORS["surface"], padx=36, pady=30)
+        card.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(card, text="INICIAR SESIÓN", font=("Segoe UI", 8, "bold"),
+                 bg=COLORS["surface"], fg=COLORS["text_dim"]).grid(
+                     row=0, column=0, columnspan=2, sticky="w", pady=(0, 14))
+
+        ent_user = self._make_entry(card, "Usuario",     row=1)
+        ent_pass = self._make_entry(card, "Contraseña",  row=2)
+        ent_pass.config(show="•")
+
+        # Etiqueta de error vacía hasta que falle el login
+        lbl_error = tk.Label(card, text="", font=FONTS["small"],
+                             bg=COLORS["surface"], fg=COLORS["danger"])
+        lbl_error.grid(row=3, column=0, columnspan=2, pady=(6, 0))
+
+        def login():
+            if ent_user.get() == LOGIN_USER and ent_pass.get() == LOGIN_PASS:
+                log_info("Login exitoso.")
+                self.root.unbind("<Return>")
+                self.build_main_window()
+            else:
+                log_warning("Intento de login fallido.")
+                lbl_error.config(text="⚠  Usuario o contraseña incorrectos")
+                ent_pass.delete(0, tk.END)
+                ent_pass.focus()
+
+        # Enter también dispara el login
+        self.root.bind("<Return>", lambda e: login())
+
+        self._make_button(card, "Ingresar →", login, style="primary", width=22).grid(
+            row=4, column=0, columnspan=2, pady=(16, 0), sticky="ew")
+
+        # Pie de página con credenciales de demo
+        tk.Label(self.root, text="Demo: usuario = admin  |  contraseña = fj2024",
+                 font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).place(
+                     relx=0.5, rely=0.96, anchor="center")
 
     # ------------------------------------------------------------------
     # Ventana Principal
