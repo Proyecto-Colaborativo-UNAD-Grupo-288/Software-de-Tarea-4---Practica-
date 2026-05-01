@@ -563,6 +563,7 @@ class App:
             ("🛠  Manage Services",      "Add and browse available services", self.manage_services,        "primary"),
             ("📋  Manage Reservations", "Create and track reservations",     self.manage_reservations,    "success"),
             ("🧪  Resilience Test",     "Simulate 10 ops",   self.test_system_resilience, "secondary"),
+            ("📊  View Full Report",    "See simulation results in a table", self.show_resilience_report, "secondary"),
         ]
 
         for title, desc, cmd, sty in nav_items:
@@ -832,99 +833,218 @@ class App:
                           style="secondary", width=18).pack(side="left")
 
     # ------------------------------------------------------------------
-    # SIMULACIÓN DE RESILIENCIA  
+    # SIMULACIÓN DE RESILIENCIA 
     # ------------------------------------------------------------------
 
-    def test_system_resilience(self):
+    # Casos de prueba compartidos entre el runner y la vista GUI
+    _CASOS_SIMULACION = [
+        ("Uvier Salinas",   "uvier@unad.edu.co",     "5",   "Sala"),      # ✅ ÉXITO
+        ("Pepito Prueba",   "pepito_sin_arroba.com", "10",  "Asesoria"),  # ❌ Email inválido
+        ("Dani Pérez",      "dani@gmail.com",        "-2",  "Equipo"),    # ❌ Duración negativa
+        ("Pancracio López", "pancracio@gmail.com",   "8",   "Sala"),      # ✅ ÉXITO
+        ("Nestor López",    "nestor@unad.edu.co",    "abc", "Equipo"),    # ❌ Duración no numérica
+        ("David Gómez",     "david@unad.edu.co",     "12",  "Asesoria"),  # ✅ ÉXITO
+        ("",                "anonimo@test.com",      "2",   "Sala"),      # ❌ Nombre vacío
+        ("Luciana Bio",     "luciana@bio.com",       "7",   "Equipo"),    # ✅ ÉXITO
+        ("Cliente X",       "x@mail.com",            "0",   "Sala"),      # ❌ Duración cero
+        ("Final UNAD",      "final@unad.edu.co",     "1",   "Asesoria"),  # ✅ ÉXITO
+    ]
 
+    def _run_simulacion(self):
+        """
+        Ejecuta los 10 casos de prueba usando las clases reales del sistema.
+        Devuelve una lista de dicts con el resultado de cada operación,
+        y los totales de éxitos y fallos.
+        Registra cada evento en system.log.
+        """
+        servicios_demo = {
+            "Sala":     self.servicios[0],   # Meeting Room A  - $50/h
+            "Equipo":   self.servicios[1],   # Projector 4K    - $25/día
+            "Asesoria": self.servicios[2],   # Java Specialist - $100/sesión
+        }
+
+        resultados = []   # Lista de dicts con el detalle de cada operación
+        exitos = 0
+        fallos = 0
+
+        for i, (nom, em, dur, tip) in enumerate(self._CASOS_SIMULACION, 1):
+            resultado = {
+                "op":      i,
+                "nombre":  nom if nom else "(vacío)",
+                "email":   em,
+                "dur":     dur,
+                "tipo":    tip,
+                "estado":  "",   # "OK" | "ERROR"
+                "detalle": "",   # descripción del resultado o del error
+                "costo":   "",   # costo formateado si fue exitoso
+            }
+            try:
+                # Paso 1 — Crear cliente real (activa validaciones de nombre y email)
+                cliente = Cliente(1000 + i, nom, em)
+
+                # Paso 2 — Validar duración con la función del sistema
+                duracion = validate_positive(dur, "Duration")
+
+                # Paso 3 — Obtener servicio y crear reserva real
+                servicio = servicios_demo[tip]
+                reserva  = Reserva(9000 + i, cliente, servicio, duracion)
+                costo    = reserva.process()
+
+                # Éxito
+                resultado["estado"]  = "OK"
+                resultado["detalle"] = servicio.name
+                resultado["costo"]   = f"${costo:.2f}"
+                log_info(f"SIMULACIÓN op.{i}: ÉXITO — '{nom}', {servicio.name}, ${costo:.2f}")
+                exitos += 1
+
+            except ValidationError as e:
+                resultado["estado"]  = "ERROR"
+                resultado["detalle"] = f"ValidationError: {e}"
+                log_error(f"SIMULACIÓN op.{i}: ValidationError — {e}")
+                fallos += 1
+
+            except ReservationError as e:
+                resultado["estado"]  = "ERROR"
+                resultado["detalle"] = f"ReservationError: {e}"
+                log_error(f"SIMULACIÓN op.{i}: ReservationError — {e}")
+                fallos += 1
+
+            except Exception as e:
+                resultado["estado"]  = "ERROR"
+                resultado["detalle"] = f"Error inesperado: {e}"
+                log_error(f"SIMULACIÓN op.{i}: Error inesperado — {e}")
+                fallos += 1
+
+            finally:
+                # finally garantiza que el intento siempre quede registrado
+                log_info(f"SIMULACIÓN op.{i}: intento finalizado (éxitos={exitos}, fallos={fallos})")
+                resultados.append(resultado)
+
+        return resultados, exitos, fallos
+
+    def test_system_resilience(self):
+        """
+        Corre la simulación y muestra el messagebox de resumen (comportamiento original).
+        También imprime en consola para trazabilidad.
+        """
         print("\n" + "=" * 52)
         print("  INICIANDO SIMULACIÓN DE RESILIENCIA - SOFTWARE FJ  ")
         print("=" * 52)
         log_info("=== INICIO SIMULACIÓN DE RESILIENCIA ===")
 
-        
-        servicios_demo = {
-            "Sala":     self.servicios[0],  
-            "Equipo":   self.servicios[1],   
-            "Asesoria": self.servicios[2],   
-        }
+        resultados, exitos, fallos = self._run_simulacion()
 
-        
-        
-        casos = [
-            ("Uvier Salinas",   "uvier@unad.edu.co",    "5",   "Sala"),      # ✅ ÉXITO
-            ("Pepito Prueba",   "pepito_sin_arroba.com","10",  "Asesoria"),  # ❌ Email inválido
-            ("Dani Pérez",      "dani@gmail.com",       "-2",  "Equipo"),    # ❌ Duración negativa
-            ("Pancracio López", "pancracio@gmail.com",  "8",   "Sala"),      # ✅ ÉXITO
-            ("Nestor López",    "nestor@unad.edu.co",   "abc", "Equipo"),    # ❌ Duración no numérica
-            ("David Gómez",     "david@unad.edu.co",    "12",  "Asesoria"),  # ✅ ÉXITO
-            ("",                "anonimo@test.com",     "2",   "Sala"),      # ❌ Nombre vacío
-            ("Luciana Bio",     "luciana@bio.com",      "7",   "Equipo"),    # ✅ ÉXITO
-            ("Cliente X",       "x@mail.com",           "0",   "Sala"),      # ❌ Duración cero
-            ("Final UNAD",      "final@unad.edu.co",    "1",   "Asesoria"),  # ✅ ÉXITO
-        ]
+        # Imprimir en consola
+        for r in resultados:
+            marca = "[✅ OK]" if r["estado"] == "OK" else "[❌ ERROR]"
+            costo_txt = f"| Total: {r['costo']}" if r["costo"] else ""
+            print(f"  {marca} Op.{r['op']} — {r['nombre']} {costo_txt} {r['detalle'] if r['estado'] == 'ERROR' else ''}")
 
-        exitos = 0
-        fallos = 0
-
-        for i, (nom, em, dur, tip) in enumerate(casos, 1):
-            print(f"\n--- Operación {i} ---")
-            try:
-                
-                id_cli = 1000 + i          # ID temporal fuera del rango normal
-                cliente = Cliente(id_cli, nom, em)
-
-                
-                duracion = validate_positive(dur, "Duration")
-
-                
-                servicio = servicios_demo[tip]
-
-                
-                id_res = 9000 + i          
-                reserva = Reserva(id_res, cliente, servicio, duracion)
-                costo   = reserva.process()
-
-                
-                print(f"  [✅ OK] {nom} | {servicio.name} | {duracion} unidades | Total: ${costo:.2f}")
-                log_info(f"SIMULACIÓN op.{i}: ÉXITO — Cliente '{nom}', Servicio '{servicio.name}', Costo ${costo:.2f}")
-                exitos += 1
-
-            except ValidationError as e:
-                
-                print(f"  [❌ VALIDACIÓN] Operación {i}: {e}")
-                log_error(f"SIMULACIÓN op.{i}: ValidationError — {e}")
-                fallos += 1
-
-            except ReservationError as e:
-                
-                print(f"  [❌ RESERVA] Operación {i}: {e}")
-                log_error(f"SIMULACIÓN op.{i}: ReservationError — {e}")
-                fallos += 1
-
-            except Exception as e:
-                
-                print(f"  [❌ ERROR INESPERADO] Operación {i}: {e}")
-                log_error(f"SIMULACIÓN op.{i}: Error inesperado — {e}")
-                fallos += 1
-
-            finally:
-                
-                log_info(f"SIMULACIÓN op.{i}: intento finalizado (éxitos={exitos}, fallos={fallos})")
-
-        
         print("\n" + "=" * 52)
         resumen = (
             f"Simulación completada.\n\n"
             f"  ✅ Operaciones exitosas : {exitos}\n"
             f"  ❌ Fallos controlados   : {fallos}\n\n"
-            f"Todos los eventos fueron registrados en '{LOG_FILE}'."
+            f"Todos los eventos fueron registrados en '{LOG_FILE}'.\n\n"
+            f"Usa 'View Full Report' en el menú para ver el detalle visual."
         )
         print(resumen)
         log_info(f"=== FIN SIMULACIÓN: {exitos} éxitos, {fallos} fallos ===")
 
-        
         messagebox.showinfo("Reporte de Resiliencia", resumen)
+
+    def show_resilience_report(self):
+        """
+        Abre una ventana secundaria con una tabla visual completa de los
+        10 casos de la simulación: estado (OK / ERROR), cliente, email,
+        duración, servicio y costo. Incluye badges de resumen y botón de cierre.
+        No toca ni modifica ningún dato real del sistema.
+        """
+        log_info("Vista GUI de simulación abierta.")
+
+        # Correr la simulación para obtener los datos
+        resultados, exitos, fallos = self._run_simulacion()
+
+        # --- Ventana secundaria (Toplevel, no reemplaza la principal) ---
+        win = tk.Toplevel(self.root)
+        win.title("Simulation Report — Software FJ")
+        win.geometry("900x540")
+        win.minsize(820, 480)
+        win.configure(bg=COLORS["bg"])
+        win.grab_set()   # Bloquea la ventana principal mientras esta esté abierta
+
+        # --- Header de la ventana ---
+        header = tk.Frame(win, bg=COLORS["surface"], pady=12)
+        header.pack(fill="x")
+        inner = tk.Frame(header, bg=COLORS["surface"])
+        inner.pack(padx=24)
+        tk.Label(inner, text="🧪  Resilience Simulation Report",
+                 font=FONTS["title"], bg=COLORS["surface"], fg=COLORS["text"]).pack(anchor="w")
+        tk.Label(inner, text="10 operations executed using real system classes",
+                 font=FONTS["small"], bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(anchor="w")
+        tk.Frame(win, bg=COLORS["accent"], height=2).pack(fill="x")
+
+        # --- Badges de resumen (éxitos / fallos / total) ---
+        badge_bar = tk.Frame(win, bg=COLORS["bg"], pady=12)
+        badge_bar.pack(fill="x", padx=28)
+
+        for count, label, color in [
+            (len(resultados), "Total Ops",      COLORS["accent"]),
+            (exitos,          "✅ Successful",   COLORS["success"]),
+            (fallos,          "❌ Controlled Errors", COLORS["danger"]),
+        ]:
+            f = tk.Frame(badge_bar, bg=COLORS["surface2"], padx=16, pady=8)
+            f.pack(side="left", padx=8)
+            tk.Label(f, text=str(count), font=("Segoe UI", 20, "bold"),
+                     bg=COLORS["surface2"], fg=color).pack()
+            tk.Label(f, text=label, font=FONTS["small"],
+                     bg=COLORS["surface2"], fg=COLORS["text_dim"]).pack()
+
+        # --- Tabla Treeview con los resultados ---
+        table_frame = tk.Frame(win, bg=COLORS["bg"], padx=28)
+        table_frame.pack(fill="both", expand=True, pady=(4, 0))
+
+        cols   = ("op", "estado", "nombre", "email", "dur", "tipo", "costo", "detalle")
+        labels = ("#",  "Status", "Client", "Email", "Dur", "Service Type", "Cost", "Detail / Error")
+        widths = [ 30,   80,       130,      160,     40,    100,            70,      220]
+
+        sb = ttk.Scrollbar(table_frame, style="Custom.Vertical.TScrollbar")
+        tree = ttk.Treeview(table_frame,
+                            columns=cols,
+                            show="headings",
+                            height=12,
+                            style="Custom.Treeview",
+                            yscrollcommand=sb.set)
+        sb.config(command=tree.yview)
+
+        for col, label, width in zip(cols, labels, widths):
+            tree.heading(col, text=label)
+            tree.column(col, width=width, anchor="w" if col in ("nombre", "email", "detalle") else "center")
+
+        # Tags de color por resultado
+        tree.tag_configure("ok",    background="#1a2e22", foreground=COLORS["success"])
+        tree.tag_configure("error", background="#2e1a1a", foreground=COLORS["danger"])
+
+        for r in resultados:
+            tag = "ok" if r["estado"] == "OK" else "error"
+            marca = "✅ OK" if r["estado"] == "OK" else "❌ ERROR"
+            tree.insert("", tk.END, tags=(tag,),
+                        values=(r["op"], marca, r["nombre"], r["email"],
+                                r["dur"], r["tipo"], r["costo"], r["detalle"]))
+
+        sb.pack(side="right", fill="y")
+        tree.pack(side="left", fill="both", expand=True)
+
+        # --- Barra inferior con nota de log y botón cerrar ---
+        bottom = tk.Frame(win, bg=COLORS["bg"], pady=10)
+        bottom.pack(fill="x", padx=28)
+
+        tk.Label(bottom,
+                 text=f"📄  All events recorded in '{LOG_FILE}'",
+                 font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left")
+
+        self._make_button(bottom, "Close  ✕", win.destroy,
+                          style="secondary", width=14).pack(side="right")
 
 
 # ============================================
