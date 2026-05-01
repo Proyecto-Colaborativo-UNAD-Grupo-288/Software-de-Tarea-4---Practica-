@@ -853,18 +853,18 @@ class App:
     # SIMULACIÓN DE RESILIENCIA 
     # ------------------------------------------------------------------
 
-    # Casos de prueba compartidos entre el runner y la vista GUI
+    
     _CASOS_SIMULACION = [
-        ("Uvier Salinas",   "uvier@unad.edu.co",     "5",   "Sala"),      # ✅ ÉXITO
-        ("Pepito Prueba",   "pepito_sin_arroba.com", "10",  "Asesoria"),  # ❌ Email inválido
-        ("Dani Pérez",      "dani@gmail.com",        "-2",  "Equipo"),    # ❌ Duración negativa
-        ("Pancracio López", "pancracio@gmail.com",   "8",   "Sala"),      # ✅ ÉXITO
-        ("Nestor López",    "nestor@unad.edu.co",    "abc", "Equipo"),    # ❌ Duración no numérica
-        ("David Gómez",     "david@unad.edu.co",     "12",  "Asesoria"),  # ✅ ÉXITO
-        ("",                "anonimo@test.com",      "2",   "Sala"),      # ❌ Nombre vacío
-        ("Luciana Bio",     "luciana@bio.com",       "7",   "Equipo"),    # ✅ ÉXITO
-        ("Cliente X",       "x@mail.com",            "0",   "Sala"),      # ❌ Duración cero
-        ("Final UNAD",      "final@unad.edu.co",     "1",   "Asesoria"),  # ✅ ÉXITO
+        ("Uvier Salinas",   "uvier@unad.edu.co",     "5",   "Sala"),      
+        ("Pepito Prueba",   "pepito_sin_arroba.com", "10",  "Asesoria"),  
+        ("Dani Pérez",      "dani@gmail.com",        "-2",  "Equipo"),    
+        ("Pancracio López", "pancracio@gmail.com",   "8",   "Sala"),      
+        ("Nestor López",    "nestor@unad.edu.co",    "abc", "Equipo"),    
+        ("David Gómez",     "david@unad.edu.co",     "12",  "Asesoria"),  
+        ("",                "anonimo@test.com",      "2",   "Sala"),      
+        ("Luciana Bio",     "luciana@bio.com",       "7",   "Equipo"),    
+        ("Cliente X",       "x@mail.com",            "0",   "Sala"),      
+        ("Final UNAD",      "final@unad.edu.co",     "1",   "Asesoria"),  
     ]
 
     def _run_simulacion(self):
@@ -875,12 +875,12 @@ class App:
         Registra cada evento en system.log.
         """
         servicios_demo = {
-            "Sala":     self.servicios[0],   # Meeting Room A  - $50/h
-            "Equipo":   self.servicios[1],   # Projector 4K    - $25/día
-            "Asesoria": self.servicios[2],   # Java Specialist - $100/sesión
+            "Sala":     self.servicios[0],   
+            "Equipo":   self.servicios[1],   
+            "Asesoria": self.servicios[2],   
         }
 
-        resultados = []   # Lista de dicts con el detalle de cada operación
+        resultados = []   
         exitos = 0
         fallos = 0
 
@@ -891,23 +891,23 @@ class App:
                 "email":   em,
                 "dur":     dur,
                 "tipo":    tip,
-                "estado":  "",   # "OK" | "ERROR"
-                "detalle": "",   # descripción del resultado o del error
-                "costo":   "",   # costo formateado si fue exitoso
+                "estado":  "",   
+                "detalle": "",   
+                "costo":   "",   
             }
             try:
-                # Paso 1 — Crear cliente real (activa validaciones de nombre y email)
+                
                 cliente = Cliente(1000 + i, nom, em)
 
-                # Paso 2 — Validar duración con la función del sistema
+                
                 duracion = validate_positive(dur, "Duration")
 
-                # Paso 3 — Obtener servicio y crear reserva real
+                
                 servicio = servicios_demo[tip]
                 reserva  = Reserva(9000 + i, cliente, servicio, duracion)
                 costo    = reserva.process()
 
-                # Éxito
+                
                 resultado["estado"]  = "OK"
                 resultado["detalle"] = servicio.name
                 resultado["costo"]   = f"${costo:.2f}"
@@ -933,7 +933,7 @@ class App:
                 fallos += 1
 
             finally:
-                # finally garantiza que el intento siempre quede registrado
+                
                 log_info(f"SIMULACIÓN op.{i}: intento finalizado (éxitos={exitos}, fallos={fallos})")
                 resultados.append(resultado)
 
@@ -951,7 +951,7 @@ class App:
 
         resultados, exitos, fallos = self._run_simulacion()
 
-        # Imprimir en consola
+        
         for r in resultados:
             marca = "[✅ OK]" if r["estado"] == "OK" else "[❌ ERROR]"
             costo_txt = f"| Total: {r['costo']}" if r["costo"] else ""
@@ -978,18 +978,18 @@ class App:
         """
         log_info("Vista GUI de simulación abierta.")
 
-        # Correr la simulación para obtener los datos
+        
         resultados, exitos, fallos = self._run_simulacion()
 
-        # --- Ventana secundaria (Toplevel, no reemplaza la principal) ---
+        
         win = tk.Toplevel(self.root)
         win.title("Simulation Report — Software FJ")
         win.geometry("900x540")
         win.minsize(820, 480)
         win.configure(bg=COLORS["bg"])
-        win.grab_set()   # Bloquea la ventana principal mientras esta esté abierta
+        win.grab_set()   
 
-        # --- Header de la ventana ---
+        
         header = tk.Frame(win, bg=COLORS["surface"], pady=12)
         header.pack(fill="x")
         inner = tk.Frame(header, bg=COLORS["surface"])
@@ -1000,7 +1000,7 @@ class App:
                  font=FONTS["small"], bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(anchor="w")
         tk.Frame(win, bg=COLORS["accent"], height=2).pack(fill="x")
 
-        # --- Badges de resumen (éxitos / fallos / total) ---
+        
         badge_bar = tk.Frame(win, bg=COLORS["bg"], pady=12)
         badge_bar.pack(fill="x", padx=28)
 
@@ -1016,7 +1016,7 @@ class App:
             tk.Label(f, text=label, font=FONTS["small"],
                      bg=COLORS["surface2"], fg=COLORS["text_dim"]).pack()
 
-        # --- Tabla Treeview con los resultados ---
+        
         table_frame = tk.Frame(win, bg=COLORS["bg"], padx=28)
         table_frame.pack(fill="both", expand=True, pady=(4, 0))
 
@@ -1037,7 +1037,7 @@ class App:
             tree.heading(col, text=label)
             tree.column(col, width=width, anchor="w" if col in ("nombre", "email", "detalle") else "center")
 
-        # Tags de color por resultado
+       
         tree.tag_configure("ok",    background="#1a2e22", foreground=COLORS["success"])
         tree.tag_configure("error", background="#2e1a1a", foreground=COLORS["danger"])
 
@@ -1051,7 +1051,7 @@ class App:
         sb.pack(side="right", fill="y")
         tree.pack(side="left", fill="both", expand=True)
 
-        # --- Barra inferior con nota de log, Run Again y botón cerrar ---
+        
         bottom = tk.Frame(win, bg=COLORS["bg"], pady=10)
         bottom.pack(fill="x", padx=28)
 
@@ -1059,7 +1059,7 @@ class App:
                  text=f"📄  All events recorded in '{LOG_FILE}'",
                  font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left")
 
-        # Botón cerrar — siempre a la derecha
+        
         self._make_button(bottom, "Close  ✕", win.destroy,
                           style="secondary", width=12).pack(side="right", padx=(6, 0))
 
@@ -1068,7 +1068,7 @@ class App:
             win.destroy()
             self.show_resilience_report()
 
-        # Botón Run Again — corre la simulación de nuevo y refresca la tabla
+        
         self._make_button(bottom, "▶ Run Again", run_again,
                           style="primary", width=13).pack(side="right")
 
