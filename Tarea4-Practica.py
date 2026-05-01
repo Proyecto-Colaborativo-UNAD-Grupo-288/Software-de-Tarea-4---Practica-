@@ -558,12 +558,11 @@ class App:
         nav = tk.Frame(self.root, bg=COLORS["bg"])
         nav.pack(fill="x", padx=28)
 
+        # Tarjetas normales (un botón cada una)
         nav_items = [
-            ("👤  Manage Clients",      "Register and view your clients",    self.manage_clients,         "primary"),
-            ("🛠  Manage Services",      "Add and browse available services", self.manage_services,        "primary"),
-            ("📋  Manage Reservations", "Create and track reservations",     self.manage_reservations,    "success"),
-            ("🧪  Resilience Test",     "Simulate 10 ops",   self.test_system_resilience, "secondary"),
-            ("📊  View Full Report",    "See simulation results in a table", self.show_resilience_report, "secondary"),
+            ("👤  Manage Clients",      "Register and view your clients",    self.manage_clients,      "primary"),
+            ("🛠  Manage Services",      "Add and browse available services", self.manage_services,     "primary"),
+            ("📋  Manage Reservations", "Create and track reservations",     self.manage_reservations, "success"),
         ]
 
         for title, desc, cmd, sty in nav_items:
@@ -576,6 +575,24 @@ class App:
             tk.Label(card, text=desc, font=FONTS["small"],
                      bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(anchor="w", pady=(2, 10))
             self._make_button(card, "Open →", cmd, style=sty, width=14).pack(anchor="w")
+
+        # Tarjeta especial de Resiliencia — dos botones: Run + View Report
+        res_card = tk.Frame(nav, bg=COLORS["surface"], padx=22, pady=16,
+                            highlightthickness=1, highlightbackground=COLORS["border"])
+        res_card.pack(side="left", expand=True, fill="both", padx=8, pady=4)
+
+        tk.Label(res_card, text="🧪  Resilience Test", font=FONTS["subtitle"],
+                 bg=COLORS["surface"], fg=COLORS["text"]).pack(anchor="w")
+        tk.Label(res_card, text="Simulate 10 ops", font=FONTS["small"],
+                 bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(anchor="w", pady=(2, 10))
+
+        # Fila de botones dentro de la tarjeta
+        btn_row = tk.Frame(res_card, bg=COLORS["surface"])
+        btn_row.pack(anchor="w")
+        self._make_button(btn_row, "▶ Run", self.test_system_resilience,
+                          style="secondary", width=9).pack(side="left", padx=(0, 6))
+        self._make_button(btn_row, "📊 Report", self.show_resilience_report,
+                          style="secondary", width=10).pack(side="left")
 
         footer = tk.Frame(self.root, bg=COLORS["bg"])
         footer.pack(side="bottom", fill="x", padx=32, pady=12)
@@ -945,8 +962,7 @@ class App:
             f"Simulación completada.\n\n"
             f"  ✅ Operaciones exitosas : {exitos}\n"
             f"  ❌ Fallos controlados   : {fallos}\n\n"
-            f"Todos los eventos fueron registrados en '{LOG_FILE}'.\n\n"
-            f"Usa 'View Full Report' en el menú para ver el detalle visual."
+            f"Todos los eventos fueron registrados en '{LOG_FILE}'."
         )
         print(resumen)
         log_info(f"=== FIN SIMULACIÓN: {exitos} éxitos, {fallos} fallos ===")
@@ -1035,7 +1051,7 @@ class App:
         sb.pack(side="right", fill="y")
         tree.pack(side="left", fill="both", expand=True)
 
-        # --- Barra inferior con nota de log y botón cerrar ---
+        # --- Barra inferior con nota de log, Run Again y botón cerrar ---
         bottom = tk.Frame(win, bg=COLORS["bg"], pady=10)
         bottom.pack(fill="x", padx=28)
 
@@ -1043,8 +1059,18 @@ class App:
                  text=f"📄  All events recorded in '{LOG_FILE}'",
                  font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left")
 
+        # Botón cerrar — siempre a la derecha
         self._make_button(bottom, "Close  ✕", win.destroy,
-                          style="secondary", width=14).pack(side="right")
+                          style="secondary", width=12).pack(side="right", padx=(6, 0))
+
+        def run_again():
+            """Cierra la ventana actual y vuelve a abrir el reporte con datos frescos."""
+            win.destroy()
+            self.show_resilience_report()
+
+        # Botón Run Again — corre la simulación de nuevo y refresca la tabla
+        self._make_button(bottom, "▶ Run Again", run_again,
+                          style="primary", width=13).pack(side="right")
 
 
 # ============================================
