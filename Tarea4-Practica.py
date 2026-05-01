@@ -41,7 +41,7 @@ def log_warning(message): logging.warning(message)
 # ============================================
 
 class SistemaError(Exception):
-    
+    """Excepción base del sistema (evita colisión con el builtin SystemError)."""
     pass
 
 class ValidationError(SistemaError):
@@ -351,7 +351,7 @@ class App:
         )
 
     # ------------------------------------------------------------------
-    # HELPERS WIDGETS REUTILIZABLES
+    # HELPERS / WIDGETS REUTILIZABLES
     # ------------------------------------------------------------------
 
     def clear_screen(self):
@@ -559,9 +559,10 @@ class App:
         nav.pack(fill="x", padx=28)
 
         nav_items = [
-            ("👤  Manage Clients",      "Register and view your clients",    self.manage_clients,      "primary"),
-            ("🛠  Manage Services",      "Add and browse available services", self.manage_services,     "primary"),
-            ("📋  Manage Reservations", "Create and track reservations",     self.manage_reservations, "success"),
+            ("👤  Manage Clients",      "Register and view your clients",    self.manage_clients,         "primary"),
+            ("🛠  Manage Services",      "Add and browse available services", self.manage_services,        "primary"),
+            ("📋  Manage Reservations", "Create and track reservations",     self.manage_reservations,    "success"),
+            ("🧪  Resilience Test",     "Simulate 10 ops",   self.test_system_resilience, "secondary"),
         ]
 
         for title, desc, cmd, sty in nav_items:
@@ -782,7 +783,7 @@ class App:
             else:
                 self.reservas.append(res)
                 messagebox.showinfo(
-                    " Confirmed",
+                    "✅ Confirmed",
                     f"Reservation #{res.id_reserva} confirmed!\n\n"
                     f"Client : {cli.name}\n"
                     f"Service: {ser.name}\n"
@@ -811,9 +812,9 @@ class App:
         tree_frame.pack(fill="both", expand=True)
 
         status_icon = {
-            STATUS_PENDING:   " Pending",
-            STATUS_CONFIRMED: " Confirmed",
-            STATUS_CANCELLED: " Cancelled",
+            STATUS_PENDING:   "🕐 Pending",
+            STATUS_CONFIRMED: "✅ Confirmed",
+            STATUS_CANCELLED: "❌ Cancelled",
         }
 
         for i, r in enumerate(self.reservas):
@@ -829,68 +830,102 @@ class App:
         bottom.pack(fill="x", padx=28)
         self._make_button(bottom, "← Back to Menu", self.build_main_window,
                           style="secondary", width=18).pack(side="left")
+
+    # ------------------------------------------------------------------
+    # SIMULACIÓN DE RESILIENCIA  
+    # ------------------------------------------------------------------
+
     def test_system_resilience(self):
-            """
-            Aporte de Uvier: Función para validar la robustez del sistema mediante 
-            la simulación de 10 operaciones (éxitos y fallos controlados).
-            """
-            # Imprime un encabezado en la consola para identificar el inicio de la prueba
-            print("\n" + "="*50)
-            print(" INICIANDO SIMULACIÓN DE RESILIENCIA - SOFTWARE FJ ")
-            print("="*50)
-            
-            # Lista de tuplas con datos de prueba: (Nombre, Email, Horas/Sesiones, Tipo)
-            # Incluye casos que deben fallar para probar los bloques try-except
-            casos = [
-                ("Uvier", "uvier@unad.edu.co", "5", "Sala"),          # ÉXITO: Caso base
-                ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"), # FALLO: Email sin '@'
-                ("Dani", "dani@gmail.com", "-2", "Equipo"),          # FALLO: Valor negativo
-                ("Pancracio", "pancracio@gmail.com", "8", "Sala"),    # ÉXITO
-                ("Nestor", "nestor@unad.edu.co", "abc", "Equipo"),    # FALLO: Texto en lugar de número
-                ("David", "david@unad.edu.co", "12", "Asesoria"),     # ÉXITO
-                ("", "anonimo@test.com", "2", "Sala"),                # FALLO: Nombre vacío
-                ("Luciana", "luciana@bio.com", "7", "Equipo"),        # ÉXITO
-                ("Cliente X", "x@mail.com", "0", "Sala"),             # FALLO: Duración en cero
-                ("Final UNAD", "final@unad.edu.co", "1", "Asesoria")  # ÉXITO
-            ]
-            
-            exitos = 0  # Contador de operaciones que pasaron las reglas
-            fallos = 0  # Contador de errores controlados por el sistema
 
-            # Bucle para recorrer cada uno de los 10 casos de la lista
-            for i, (nom, em, dur, tip) in enumerate(casos, 1):
-                try:
-                    print(f"Procesando operación {i}...")
-                    
-                    # REGLA 1: El nombre no puede estar vacío
-                    if not nom: 
-                        raise ValueError("El nombre del cliente es obligatorio.")
-                    
-                    # REGLA 2: El email debe contener un símbolo de '@'
-                    if "@" not in em: 
-                        raise ValueError(f"Email inválido para {nom}: falta el '@'.")
-                    
-                    # REGLA 3: Intentar convertir la duración a número y validar que sea mayor a cero
-                    if float(dur) <= 0: 
-                        raise ValueError(f"La duración ({dur}) debe ser un número positivo.")
-                    
-                    # Si las reglas anteriores se cumplen, la operación es exitosa
-                    print(f"  [OK] Operación {i} completada para {nom}.")
-                    #logging.info(f"SIMULACIÓN {i}: Éxito - Cliente {nom}") # Registro en system.log
-                    exitos += 1
+        print("\n" + "=" * 52)
+        print("  INICIANDO SIMULACIÓN DE RESILIENCIA - SOFTWARE FJ  ")
+        print("=" * 52)
+        log_info("=== INICIO SIMULACIÓN DE RESILIENCIA ===")
 
-                except Exception as e:
-                    # Si ocurre un error, el sistema NO se detiene; atrapa el error aquí
-                    print(f"  [ERROR CONTROLADO] Operación {i} falló: {e}")
-                    #logging.error(f"SIMULACIÓN {i}: Fallo detectado -> {e}") # Registro del error en log
-                    fallos += 1
+        
+        servicios_demo = {
+            "Sala":     self.servicios[0],  
+            "Equipo":   self.servicios[1],   
+            "Asesoria": self.servicios[2],   
+        }
 
-            # Al terminar el bucle, se crea un resumen de los resultados
-            resumen = f"Simulación finalizada.\nÉxitos: {exitos} | Fallos controlados: {fallos}"
-            print(f"\n{resumen}")
-            
-            # Muestra una ventana emergente en la interfaz con el resultado final
-            messagebox.showinfo("Reporte de Resiliencia (Aporte Uvier)", resumen)
+        
+        
+        casos = [
+            ("Uvier Salinas",   "uvier@unad.edu.co",    "5",   "Sala"),      # ✅ ÉXITO
+            ("Pepito Prueba",   "pepito_sin_arroba.com","10",  "Asesoria"),  # ❌ Email inválido
+            ("Dani Pérez",      "dani@gmail.com",       "-2",  "Equipo"),    # ❌ Duración negativa
+            ("Pancracio López", "pancracio@gmail.com",  "8",   "Sala"),      # ✅ ÉXITO
+            ("Nestor López",    "nestor@unad.edu.co",   "abc", "Equipo"),    # ❌ Duración no numérica
+            ("David Gómez",     "david@unad.edu.co",    "12",  "Asesoria"),  # ✅ ÉXITO
+            ("",                "anonimo@test.com",     "2",   "Sala"),      # ❌ Nombre vacío
+            ("Luciana Bio",     "luciana@bio.com",      "7",   "Equipo"),    # ✅ ÉXITO
+            ("Cliente X",       "x@mail.com",           "0",   "Sala"),      # ❌ Duración cero
+            ("Final UNAD",      "final@unad.edu.co",    "1",   "Asesoria"),  # ✅ ÉXITO
+        ]
+
+        exitos = 0
+        fallos = 0
+
+        for i, (nom, em, dur, tip) in enumerate(casos, 1):
+            print(f"\n--- Operación {i} ---")
+            try:
+                
+                id_cli = 1000 + i          # ID temporal fuera del rango normal
+                cliente = Cliente(id_cli, nom, em)
+
+                
+                duracion = validate_positive(dur, "Duration")
+
+                
+                servicio = servicios_demo[tip]
+
+                
+                id_res = 9000 + i          
+                reserva = Reserva(id_res, cliente, servicio, duracion)
+                costo   = reserva.process()
+
+                
+                print(f"  [✅ OK] {nom} | {servicio.name} | {duracion} unidades | Total: ${costo:.2f}")
+                log_info(f"SIMULACIÓN op.{i}: ÉXITO — Cliente '{nom}', Servicio '{servicio.name}', Costo ${costo:.2f}")
+                exitos += 1
+
+            except ValidationError as e:
+                
+                print(f"  [❌ VALIDACIÓN] Operación {i}: {e}")
+                log_error(f"SIMULACIÓN op.{i}: ValidationError — {e}")
+                fallos += 1
+
+            except ReservationError as e:
+                
+                print(f"  [❌ RESERVA] Operación {i}: {e}")
+                log_error(f"SIMULACIÓN op.{i}: ReservationError — {e}")
+                fallos += 1
+
+            except Exception as e:
+                
+                print(f"  [❌ ERROR INESPERADO] Operación {i}: {e}")
+                log_error(f"SIMULACIÓN op.{i}: Error inesperado — {e}")
+                fallos += 1
+
+            finally:
+                
+                log_info(f"SIMULACIÓN op.{i}: intento finalizado (éxitos={exitos}, fallos={fallos})")
+
+        
+        print("\n" + "=" * 52)
+        resumen = (
+            f"Simulación completada.\n\n"
+            f"  ✅ Operaciones exitosas : {exitos}\n"
+            f"  ❌ Fallos controlados   : {fallos}\n\n"
+            f"Todos los eventos fueron registrados en '{LOG_FILE}'."
+        )
+        print(resumen)
+        log_info(f"=== FIN SIMULACIÓN: {exitos} éxitos, {fallos} fallos ===")
+
+        
+        messagebox.showinfo("Reporte de Resiliencia", resumen)
+
 
 # ============================================
 # FUNCIÓN PRINCIPAL
@@ -899,7 +934,6 @@ class App:
 def main():
     root = tk.Tk()
     app = App(root)
-    app.test_system_resilience()
     root.mainloop()
 
 
@@ -912,4 +946,6 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         log_error(f"Critical error: {str(e)}")
-
+        print("Critical error. Check logs.")
+    finally:
+        logging.shutdown()

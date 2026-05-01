@@ -72,3 +72,116 @@
 2026-04-30 18:34:08,508 - INFO - Reservation 2 successful. Cost: 45.0
 2026-04-30 18:34:08,508 - INFO - Reservation 2 processing attempt finished
 2026-04-30 18:34:10,876 - INFO - Res ID 2 created for david
+2026-04-30 21:41:55,227 - INFO - Login exitoso.
+2026-04-30 21:42:01,788 - INFO - === INICIO SIMULACIÓN DE RESILIENCIA ===
+2026-04-30 21:42:01,789 - INFO - Reservation 9001 confirmed
+2026-04-30 21:42:01,789 - INFO - Reservation 9001 successful. Cost: 225.0
+2026-04-30 21:42:01,789 - INFO - Reservation 9001 processing attempt finished
+2026-04-30 21:42:01,790 - INFO - SIMULACIÓN op.1: ÉXITO — Cliente 'Uvier Salinas', Servicio 'Meeting Room A', Costo $225.00
+2026-04-30 21:42:01,790 - INFO - SIMULACIÓN op.1: intento finalizado (éxitos=1, fallos=0)
+2026-04-30 21:42:01,791 - ERROR - SIMULACIÓN op.2: ValidationError — Invalid email format
+2026-04-30 21:42:01,791 - INFO - SIMULACIÓN op.2: intento finalizado (éxitos=1, fallos=1)
+2026-04-30 21:42:01,791 - ERROR - SIMULACIÓN op.3: ValidationError — Duration must be positive
+2026-04-30 21:42:01,791 - INFO - SIMULACIÓN op.3: intento finalizado (éxitos=1, fallos=2)
+2026-04-30 21:42:01,792 - INFO - Reservation 9004 confirmed
+2026-04-30 21:42:01,792 - INFO - Reservation 9004 successful. Cost: 360.0
+2026-04-30 21:42:01,792 - INFO - Reservation 9004 processing attempt finished
+2026-04-30 21:42:01,792 - INFO - SIMULACIÓN op.4: ÉXITO — Cliente 'Pancracio López', Servicio 'Meeting Room A', Costo $360.00
+2026-04-30 21:42:01,792 - INFO - SIMULACIÓN op.4: intento finalizado (éxitos=2, fallos=2)
+2026-04-30 21:42:01,792 - ERROR - SIMULACIÓN op.5: ValidationError — Duration must be a number
+2026-04-30 21:42:01,792 - INFO - SIMULACIÓN op.5: intento finalizado (éxitos=2, fallos=3)
+2026-04-30 21:42:01,792 - INFO - Reservation 9006 confirmed
+2026-04-30 21:42:01,792 - INFO - Reservation 9006 successful. Cost: 1080.0
+2026-04-30 21:42:01,793 - INFO - Reservation 9006 processing attempt finished
+2026-04-30 21:42:01,793 - INFO - SIMULACIÓN op.6: ÉXITO — Cliente 'David Gómez', Servicio 'Java Specialist', Costo $1080.00
+2026-04-30 21:42:01,793 - INFO - SIMULACIÓN op.6: intento finalizado (éxitos=3, fallos=3)
+2026-04-30 21:42:01,793 - ERROR - SIMULACIÓN op.7: ValidationError — Name must be a non-empty string
+2026-04-30 21:42:01,793 - INFO - SIMULACIÓN op.7: intento finalizado (éxitos=3, fallos=4)
+2026-04-30 21:42:01,793 - INFO - Reservation 9008 confirmed
+2026-04-30 21:42:01,793 - INFO - Reservation 9008 successful. Cost: 157.5
+2026-04-30 21:42:01,793 - INFO - Reservation 9008 processing attempt finished
+2026-04-30 21:42:01,793 - INFO - SIMULACIÓN op.8: ÉXITO — Cliente 'Luciana Bio', Servicio 'Projector 4K', Costo $157.50
+2026-04-30 21:42:01,793 - INFO - SIMULACIÓN op.8: intento finalizado (éxitos=4, fallos=4)
+2026-04-30 21:42:01,794 - ERROR - SIMULACIÓN op.9: ValidationError — Duration must be positive
+2026-04-30 21:42:01,794 - INFO - SIMULACIÓN op.9: intento finalizado (éxitos=4, fallos=5)
+2026-04-30 21:42:01,794 - INFO - Reservation 9010 confirmed
+2026-04-30 21:42:01,794 - INFO - Reservation 9010 successful. Cost: 90.0
+2026-04-30 21:42:01,794 - INFO - Reservation 9010 processing attempt finished
+2026-04-30 21:42:01,794 - INFO - SIMULACIÓN op.10: ÉXITO — Cliente 'Final UNAD', Servicio 'Java Specialist', Costo $90.00
+2026-04-30 21:42:01,794 - INFO - SIMULACIÓN op.10: intento finalizado (éxitos=5, fallos=5)
+2026-04-30 21:42:01,794 - INFO - === FIN SIMULACIÓN: 5 éxitos, 5 fallos ===
+2026-04-30 21:42:08,600 - INFO - === INICIO SIMULACIÓN DE RESILIENCIA ===
+2026-04-30 21:42:08,600 - INFO - Reservation 9001 confirmed
+2026-04-30 21:42:08,601 - INFO - Reservation 9001 successful. Cost: 225.0
+2026-04-30 21:42:08,601 - INFO - Reservation 9001 processing attempt finished
+2026-04-30 21:42:08,601 - INFO - SIMULACIÓN op.1: ÉXITO — Cliente 'Uvier Salinas', Servicio 'Meeting Room A', Costo $225.00
+2026-04-30 21:42:08,601 - INFO - SIMULACIÓN op.1: intento finalizado (éxitos=1, fallos=0)
+2026-04-30 21:42:08,602 - ERROR - SIMULACIÓN op.2: ValidationError — Invalid email format
+2026-04-30 21:42:08,602 - INFO - SIMULACIÓN op.2: intento finalizado (éxitos=1, fallos=1)
+2026-04-30 21:42:08,602 - ERROR - SIMULACIÓN op.3: ValidationError — Duration must be positive
+2026-04-30 21:42:08,602 - INFO - SIMULACIÓN op.3: intento finalizado (éxitos=1, fallos=2)
+2026-04-30 21:42:08,603 - INFO - Reservation 9004 confirmed
+2026-04-30 21:42:08,603 - INFO - Reservation 9004 successful. Cost: 360.0
+2026-04-30 21:42:08,603 - INFO - Reservation 9004 processing attempt finished
+2026-04-30 21:42:08,603 - INFO - SIMULACIÓN op.4: ÉXITO — Cliente 'Pancracio López', Servicio 'Meeting Room A', Costo $360.00
+2026-04-30 21:42:08,603 - INFO - SIMULACIÓN op.4: intento finalizado (éxitos=2, fallos=2)
+2026-04-30 21:42:08,603 - ERROR - SIMULACIÓN op.5: ValidationError — Duration must be a number
+2026-04-30 21:42:08,603 - INFO - SIMULACIÓN op.5: intento finalizado (éxitos=2, fallos=3)
+2026-04-30 21:42:08,603 - INFO - Reservation 9006 confirmed
+2026-04-30 21:42:08,604 - INFO - Reservation 9006 successful. Cost: 1080.0
+2026-04-30 21:42:08,604 - INFO - Reservation 9006 processing attempt finished
+2026-04-30 21:42:08,604 - INFO - SIMULACIÓN op.6: ÉXITO — Cliente 'David Gómez', Servicio 'Java Specialist', Costo $1080.00
+2026-04-30 21:42:08,604 - INFO - SIMULACIÓN op.6: intento finalizado (éxitos=3, fallos=3)
+2026-04-30 21:42:08,604 - ERROR - SIMULACIÓN op.7: ValidationError — Name must be a non-empty string
+2026-04-30 21:42:08,604 - INFO - SIMULACIÓN op.7: intento finalizado (éxitos=3, fallos=4)
+2026-04-30 21:42:08,605 - INFO - Reservation 9008 confirmed
+2026-04-30 21:42:08,605 - INFO - Reservation 9008 successful. Cost: 157.5
+2026-04-30 21:42:08,605 - INFO - Reservation 9008 processing attempt finished
+2026-04-30 21:42:08,605 - INFO - SIMULACIÓN op.8: ÉXITO — Cliente 'Luciana Bio', Servicio 'Projector 4K', Costo $157.50
+2026-04-30 21:42:08,605 - INFO - SIMULACIÓN op.8: intento finalizado (éxitos=4, fallos=4)
+2026-04-30 21:42:08,605 - ERROR - SIMULACIÓN op.9: ValidationError — Duration must be positive
+2026-04-30 21:42:08,605 - INFO - SIMULACIÓN op.9: intento finalizado (éxitos=4, fallos=5)
+2026-04-30 21:42:08,606 - INFO - Reservation 9010 confirmed
+2026-04-30 21:42:08,606 - INFO - Reservation 9010 successful. Cost: 90.0
+2026-04-30 21:42:08,606 - INFO - Reservation 9010 processing attempt finished
+2026-04-30 21:42:08,606 - INFO - SIMULACIÓN op.10: ÉXITO — Cliente 'Final UNAD', Servicio 'Java Specialist', Costo $90.00
+2026-04-30 21:42:08,606 - INFO - SIMULACIÓN op.10: intento finalizado (éxitos=5, fallos=5)
+2026-04-30 21:42:08,607 - INFO - === FIN SIMULACIÓN: 5 éxitos, 5 fallos ===
+2026-04-30 21:42:22,080 - WARNING - Attempt to create reservation without clients
+2026-04-30 21:42:28,862 - INFO - === INICIO SIMULACIÓN DE RESILIENCIA ===
+2026-04-30 21:42:28,863 - INFO - Reservation 9001 confirmed
+2026-04-30 21:42:28,863 - INFO - Reservation 9001 successful. Cost: 225.0
+2026-04-30 21:42:28,863 - INFO - Reservation 9001 processing attempt finished
+2026-04-30 21:42:28,863 - INFO - SIMULACIÓN op.1: ÉXITO — Cliente 'Uvier Salinas', Servicio 'Meeting Room A', Costo $225.00
+2026-04-30 21:42:28,863 - INFO - SIMULACIÓN op.1: intento finalizado (éxitos=1, fallos=0)
+2026-04-30 21:42:28,863 - ERROR - SIMULACIÓN op.2: ValidationError — Invalid email format
+2026-04-30 21:42:28,863 - INFO - SIMULACIÓN op.2: intento finalizado (éxitos=1, fallos=1)
+2026-04-30 21:42:28,864 - ERROR - SIMULACIÓN op.3: ValidationError — Duration must be positive
+2026-04-30 21:42:28,864 - INFO - SIMULACIÓN op.3: intento finalizado (éxitos=1, fallos=2)
+2026-04-30 21:42:28,864 - INFO - Reservation 9004 confirmed
+2026-04-30 21:42:28,864 - INFO - Reservation 9004 successful. Cost: 360.0
+2026-04-30 21:42:28,864 - INFO - Reservation 9004 processing attempt finished
+2026-04-30 21:42:28,864 - INFO - SIMULACIÓN op.4: ÉXITO — Cliente 'Pancracio López', Servicio 'Meeting Room A', Costo $360.00
+2026-04-30 21:42:28,864 - INFO - SIMULACIÓN op.4: intento finalizado (éxitos=2, fallos=2)
+2026-04-30 21:42:28,865 - ERROR - SIMULACIÓN op.5: ValidationError — Duration must be a number
+2026-04-30 21:42:28,865 - INFO - SIMULACIÓN op.5: intento finalizado (éxitos=2, fallos=3)
+2026-04-30 21:42:28,865 - INFO - Reservation 9006 confirmed
+2026-04-30 21:42:28,865 - INFO - Reservation 9006 successful. Cost: 1080.0
+2026-04-30 21:42:28,865 - INFO - Reservation 9006 processing attempt finished
+2026-04-30 21:42:28,865 - INFO - SIMULACIÓN op.6: ÉXITO — Cliente 'David Gómez', Servicio 'Java Specialist', Costo $1080.00
+2026-04-30 21:42:28,865 - INFO - SIMULACIÓN op.6: intento finalizado (éxitos=3, fallos=3)
+2026-04-30 21:42:28,865 - ERROR - SIMULACIÓN op.7: ValidationError — Name must be a non-empty string
+2026-04-30 21:42:28,865 - INFO - SIMULACIÓN op.7: intento finalizado (éxitos=3, fallos=4)
+2026-04-30 21:42:28,866 - INFO - Reservation 9008 confirmed
+2026-04-30 21:42:28,866 - INFO - Reservation 9008 successful. Cost: 157.5
+2026-04-30 21:42:28,866 - INFO - Reservation 9008 processing attempt finished
+2026-04-30 21:42:28,866 - INFO - SIMULACIÓN op.8: ÉXITO — Cliente 'Luciana Bio', Servicio 'Projector 4K', Costo $157.50
+2026-04-30 21:42:28,866 - INFO - SIMULACIÓN op.8: intento finalizado (éxitos=4, fallos=4)
+2026-04-30 21:42:28,866 - ERROR - SIMULACIÓN op.9: ValidationError — Duration must be positive
+2026-04-30 21:42:28,866 - INFO - SIMULACIÓN op.9: intento finalizado (éxitos=4, fallos=5)
+2026-04-30 21:42:28,866 - INFO - Reservation 9010 confirmed
+2026-04-30 21:42:28,866 - INFO - Reservation 9010 successful. Cost: 90.0
+2026-04-30 21:42:28,867 - INFO - Reservation 9010 processing attempt finished
+2026-04-30 21:42:28,867 - INFO - SIMULACIÓN op.10: ÉXITO — Cliente 'Final UNAD', Servicio 'Java Specialist', Costo $90.00
+2026-04-30 21:42:28,867 - INFO - SIMULACIÓN op.10: intento finalizado (éxitos=5, fallos=5)
+2026-04-30 21:42:28,867 - INFO - === FIN SIMULACIÓN: 5 éxitos, 5 fallos ===
