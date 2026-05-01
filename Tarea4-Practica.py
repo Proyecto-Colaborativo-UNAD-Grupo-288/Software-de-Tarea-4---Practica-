@@ -829,7 +829,68 @@ class App:
         bottom.pack(fill="x", padx=28)
         self._make_button(bottom, "← Back to Menu", self.build_main_window,
                           style="secondary", width=18).pack(side="left")
+    def test_system_resilience(self):
+            """
+            Aporte de Uvier: Función para validar la robustez del sistema mediante 
+            la simulación de 10 operaciones (éxitos y fallos controlados).
+            """
+            # Imprime un encabezado en la consola para identificar el inicio de la prueba
+            print("\n" + "="*50)
+            print(" INICIANDO SIMULACIÓN DE RESILIENCIA - SOFTWARE FJ ")
+            print("="*50)
+            
+            # Lista de tuplas con datos de prueba: (Nombre, Email, Horas/Sesiones, Tipo)
+            # Incluye casos que deben fallar para probar los bloques try-except
+            casos = [
+                ("Uvier", "uvier@unad.edu.co", "5", "Sala"),          # ÉXITO: Caso base
+                ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"), # FALLO: Email sin '@'
+                ("Dani", "dani@gmail.com", "-2", "Equipo"),          # FALLO: Valor negativo
+                ("Pancracio", "pancracio@gmail.com", "8", "Sala"),    # ÉXITO
+                ("Nestor", "nestor@unad.edu.co", "abc", "Equipo"),    # FALLO: Texto en lugar de número
+                ("David", "david@unad.edu.co", "12", "Asesoria"),     # ÉXITO
+                ("", "anonimo@test.com", "2", "Sala"),                # FALLO: Nombre vacío
+                ("Luciana", "luciana@bio.com", "7", "Equipo"),        # ÉXITO
+                ("Cliente X", "x@mail.com", "0", "Sala"),             # FALLO: Duración en cero
+                ("Final UNAD", "final@unad.edu.co", "1", "Asesoria")  # ÉXITO
+            ]
+            
+            exitos = 0  # Contador de operaciones que pasaron las reglas
+            fallos = 0  # Contador de errores controlados por el sistema
 
+            # Bucle para recorrer cada uno de los 10 casos de la lista
+            for i, (nom, em, dur, tip) in enumerate(casos, 1):
+                try:
+                    print(f"Procesando operación {i}...")
+                    
+                    # REGLA 1: El nombre no puede estar vacío
+                    if not nom: 
+                        raise ValueError("El nombre del cliente es obligatorio.")
+                    
+                    # REGLA 2: El email debe contener un símbolo de '@'
+                    if "@" not in em: 
+                        raise ValueError(f"Email inválido para {nom}: falta el '@'.")
+                    
+                    # REGLA 3: Intentar convertir la duración a número y validar que sea mayor a cero
+                    if float(dur) <= 0: 
+                        raise ValueError(f"La duración ({dur}) debe ser un número positivo.")
+                    
+                    # Si las reglas anteriores se cumplen, la operación es exitosa
+                    print(f"  [OK] Operación {i} completada para {nom}.")
+                    #logging.info(f"SIMULACIÓN {i}: Éxito - Cliente {nom}") # Registro en system.log
+                    exitos += 1
+
+                except Exception as e:
+                    # Si ocurre un error, el sistema NO se detiene; atrapa el error aquí
+                    print(f"  [ERROR CONTROLADO] Operación {i} falló: {e}")
+                    #logging.error(f"SIMULACIÓN {i}: Fallo detectado -> {e}") # Registro del error en log
+                    fallos += 1
+
+            # Al terminar el bucle, se crea un resumen de los resultados
+            resumen = f"Simulación finalizada.\nÉxitos: {exitos} | Fallos controlados: {fallos}"
+            print(f"\n{resumen}")
+            
+            # Muestra una ventana emergente en la interfaz con el resultado final
+            messagebox.showinfo("Reporte de Resiliencia (Aporte Uvier)", resumen)
 
 # ============================================
 # FUNCIÓN PRINCIPAL
@@ -838,6 +899,7 @@ class App:
 def main():
     root = tk.Tk()
     app = App(root)
+    app.test_system_resilience()
     root.mainloop()
 
 
@@ -850,6 +912,4 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         log_error(f"Critical error: {str(e)}")
-        print("Critical error. Check logs.")
-    finally:
-        logging.shutdown()
+
