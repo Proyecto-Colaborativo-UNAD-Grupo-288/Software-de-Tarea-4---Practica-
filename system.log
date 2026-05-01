@@ -72,3 +72,26 @@
 2026-04-30 18:34:08,508 - INFO - Reservation 2 successful. Cost: 45.0
 2026-04-30 18:34:08,508 - INFO - Reservation 2 processing attempt finished
 2026-04-30 18:34:10,876 - INFO - Res ID 2 created for david
+2026-04-30 21:46:02,163 - INFO - Login exitoso.
+2026-04-30 21:46:10,012 - WARNING - Attempt to create reservation without clients
+2026-04-30 21:55:44,847 - INFO - Login exitoso.
+2026-04-30 21:56:28,386 - INFO - Login exitoso.
+2026-04-30 21:56:44,575 - INFO - Service ID 1 updated.
+2026-04-30 21:56:56,745 - INFO - Service taladro created with ID 4.
+2026-04-30 21:57:08,907 - INFO - Service ID 4 updated.
+2026-04-30 21:57:17,081 - INFO - Service ID 3 deleted.
+2026-04-30 21:57:30,592 - INFO - Service ID 3 updated.
+2026-04-30 21:57:44,092 - INFO - Service cama created with ID 4.
+2026-04-30 21:58:04,147 - INFO - Service martillo  created with ID 5.
+2026-04-30 21:58:18,682 - INFO - Service ID 5 deleted.
+2026-04-30 21:58:27,063 - INFO - Service ID 5 updated.
+2026-04-30 22:01:14,154 - INFO - Login exitoso.
+2026-04-30 22:02:33,751 - INFO - Login exitoso.
+2026-04-30 22:02:44,012 - INFO - Service caracol created with ID 4.
+2026-04-30 22:02:49,567 - INFO - Service ID 4 deleted.
+2026-04-30 22:02:55,904 - INFO - Service raton created with ID 4.
+2026-04-30 22:03:05,763 - INFO - Service camion created with ID 5.
+2026-04-30 22:03:12,369 - INFO - Service ID 4 updated.
+2026-04-30 22:03:18,997 - INFO - Service ID 4 updated.
+2026-04-30 22:03:25,294 - INFO - Service ID 4 deleted.
+2026-04-30 22:03:31,535 - INFO - Service cartera created with ID 6.
