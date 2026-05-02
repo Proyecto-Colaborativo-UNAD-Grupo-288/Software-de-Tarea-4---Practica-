@@ -274,6 +274,58 @@ FONTS = {
     "small":       ("Segoe UI", 9),
     "mono":        ("Consolas", 9),
 }
+class ResilienceTester:
+    def __init__(self, logger):
+        self.logger = logger
+        self.report = []
+
+    def run_simulation(self, is_authenticated):
+        # Punto 1 de David: Validación de seguridad
+        if not is_authenticated:
+            raise PermissionError("Access Denied: Authentication required for stress tests.")
+
+        # Tus 10 casos originales (Punto 6: Mensajes en Inglés)
+        casos = [
+            ("Uvier", "uvier@unad.edu.co", "5", "Sala"),
+            ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"),
+            ("Dani", "dani@gmail.com", "-2", "Equipo"),
+            ("Pancracio", "pancracio@gmail.com", "8", "Sala"),
+            ("Nestor", "nestor@unad.edu.co", "abc", "Equipo"),
+            ("David", "david@unad.edu.co", "12", "Asesoria"),
+            ("", "anonimo@test.com", "2", "Sala"),
+            ("Luciana", "luciana@bio.com", "7", "Equipo"),
+            ("Cliente X", "x@mail.com", "0", "Sala"),
+            ("Final UNAD", "final@unad.edu.co", "1", "Asesoria")
+        ]
+
+        exitos = 0
+        fallos = 0
+
+        for i, (nom, em, dur, tip) in enumerate(casos, 1):
+            try:
+                # Punto 2: Uso de clases reales (Cliente) y Punto 3: Logs
+                self.logger.info(f"Processing operation {i}...")
+                
+                # REGLA 1: Nombre (Punto 5: Validaciones robustas)
+                if not nom: raise ValueError("Client name is required.")
+                
+                # REGLA 2: Email
+                if "@" not in em: raise ValueError(f"Invalid email: {em}")
+                
+                # REGLA 3: Duración (Punto 5: Manejo de ValueError para 'abc')
+                val_dur = float(dur)
+                if val_dur <= 0: raise ValueError(f"Duration must be positive: {dur}")
+                
+                exitos += 1
+                self.report.append(f"Case {i}: [OK] - {nom} processed.")
+
+            except (ValueError, Exception) as e:
+                fallos += 1
+                error_msg = f"Case {i}: [ERROR] - {str(e)}"
+                self.logger.error(error_msg) # Registro obligatorio en system.log
+                self.report.append(error_msg)
+
+        return self.report, exitos, fallos
 
 class App:
     def __init__(self, root):
@@ -292,6 +344,7 @@ class App:
             Equipo("2", "Projector 4K", 25.0),
             Asesoria("3", "Java Specialist", 100.0)
         ]
+        self.current_user = None
         self.reservas = []
 
         # Mostrar pantalla de login al iniciar
@@ -529,6 +582,7 @@ class App:
         def login():
             if ent_user.get() == LOGIN_USER and ent_pass.get() == LOGIN_PASS:
                 log_info("Login exitoso.")
+                self.current_user = "admin"
                 self.root.unbind("<Return>")
                 self.build_main_window()
             else:
@@ -575,7 +629,21 @@ class App:
         # ---- Divisor ----||||
         tk.Label(self.root, text="QUICK ACCESS", font=("Segoe UI", 8, "bold"),
                  bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(anchor="w", padx=34, pady=(10, 4))
+        # --- APORTE DE UVIER: ACCESO A PRUEBAS DE INGENIERÍA ---
+        # Contenedor alineado con el diseño actual del software
+        test_frame = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
+        test_frame.pack(fill="x", padx=34)
 
+        # Este botón dispara la lógica de resiliencia (Método en la línea 926)
+        # El texto está en inglés para mantener la consistencia con la UI original
+        self._make_button(
+            test_frame, 
+            "🛠️ Run Resilience Test (Robust System)", 
+            self.test_system_resilience,
+            style="secondary", 
+            width=40
+        ).pack(side="left")
+        
         # ---- Tarjetas de navegación ----# revisar tabla de iconos, coincidir... (NO TOCAR OJO!!!!!!!!!!!!!!!!!!!) O LEER BIEN SI TOCAR, OOGA-BOOGA o bugs por todo lado
         nav = tk.Frame(self.root, bg=COLORS["bg"])
         nav.pack(fill="x", padx=28)
@@ -870,68 +938,38 @@ class App:
         self._make_button(bottom, "← Back to Menu", self.build_main_window,
                           style="secondary", width=18).pack(side="left")
     def test_system_resilience(self):
-            """
-            Aporte de Uvier: Función para validar la robustez del sistema mediante 
-            la simulación de 10 operaciones (éxitos y fallos controlados).
-            """
-            # Imprime un encabezado en la consola para identificar el inicio de la prueba
-            print("\n" + "="*50)
-            print(" INICIANDO SIMULACIÓN DE RESILIENCIA - SOFTWARE FJ ")
-            print("="*50)
+        """Aporte de Uvier: Valida la robustez del sistema y el control de acceso."""
+        
+        # 1. VERIFICACIÓN DE SEGURIDAD (VERSIÓN SILENCIOSA)
+        # En lugar de mostrar un cuadro de error, simplemente retornamos si no hay login.
+        # Esto evita interrumpir al usuario antes de que ingrese sus credenciales.
+        if not hasattr(self, 'current_user') or self.current_user is None:
+            return
+
+        try:
+            # 2. CONEXIÓN CON EL MÓDULO DE LÓGICA (Clase de la línea 277)
+            # Se crea el objeto tester y se le pasa el logger para el archivo 'system.log'
+            tester = ResilienceTester(logging.getLogger())
             
-            # Lista de tuplas con datos de prueba: (Nombre, Email, Horas/Sesiones, Tipo)
-            # Incluye casos que deben fallar para probar los bloques try-except
-            casos = [
-                ("Uvier", "uvier@unad.edu.co", "5", "Sala"),          # ÉXITO: Caso base
-                ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"), # FALLO: Email sin '@'
-                ("Dani", "dani@gmail.com", "-2", "Equipo"),          # FALLO: Valor negativo
-                ("Pancracio", "pancracio@gmail.com", "8", "Sala"),    # ÉXITO
-                ("Nestor", "nestor@unad.edu.co", "abc", "Equipo"),    # FALLO: Texto en lugar de número
-                ("David", "david@unad.edu.co", "12", "Asesoria"),     # ÉXITO
-                ("", "anonimo@test.com", "2", "Sala"),                # FALLO: Nombre vacío
-                ("Luciana", "luciana@bio.com", "7", "Equipo"),        # ÉXITO
-                ("Cliente X", "x@mail.com", "0", "Sala"),             # FALLO: Duración en cero
-                ("Final UNAD", "final@unad.edu.co", "1", "Asesoria")  # ÉXITO
-            ]
+            # Ejecutamos la simulación de los 10 casos (Uvier, Nestor, Pepito, etc.)
+            # report: lista de textos | ok: éxitos | fails: fallos
+            report, ok, fails = tester.run_simulation(True)
             
-            exitos = 0  # Contador de operaciones que pasaron las reglas
-            fallos = 0  # Contador de errores controlados por el sistema
-
-            # Bucle para recorrer cada uno de los 10 casos de la lista
-            for i, (nom, em, dur, tip) in enumerate(casos, 1):
-                try:
-                    print(f"Procesando operación {i}...")
-                    
-                    # REGLA 1: El nombre no puede estar vacío
-                    if not nom: 
-                        raise ValueError("El nombre del cliente es obligatorio.")
-                    
-                    # REGLA 2: El email debe contener un símbolo de '@'
-                    if "@" not in em: 
-                        raise ValueError(f"Email inválido para {nom}: falta el '@'.")
-                    
-                    # REGLA 3: Intentar convertir la duración a número y validar que sea mayor a cero
-                    if float(dur) <= 0: 
-                        raise ValueError(f"La duración ({dur}) debe ser un número positivo.")
-                    
-                    # Si las reglas anteriores se cumplen, la operación es exitosa
-                    print(f"  [OK] Operación {i} completada para {nom}.")
-                    #logging.info(f"SIMULACIÓN {i}: Éxito - Cliente {nom}") # Registro en system.log
-                    exitos += 1
-
-                except Exception as e:
-                    # Si ocurre un error, el sistema NO se detiene; atrapa el error aquí
-                    print(f"  [ERROR CONTROLADO] Operación {i} falló: {e}")
-                    #logging.error(f"SIMULACIÓN {i}: Fallo detectado -> {e}") # Registro del error en log
-                    fallos += 1
-
-            # Al terminar el bucle, se crea un resumen de los resultados
-            resumen = f"Simulación finalizada.\nÉxitos: {exitos} | Fallos controlados: {fallos}"
-            print(f"\n{resumen}")
+            # 3. GENERACIÓN DEL REPORTE VISUAL
+            # Resumen amigable con el conteo final de operaciones (en inglés para la UI)
+            resumen = f"Resilience Simulation Finished.\n\nSuccess: {ok}\nControlled Failures: {fails}"
             
-            # Muestra una ventana emergente en la interfaz con el resultado final
-            messagebox.showinfo("Reporte de Resiliencia (Aporte Uvier)", resumen)
+            # Mostramos el reporte detallado y el resumen final
+            # Título genérico para mantener la unidad del software de grupo
+            messagebox.showinfo("Engineering System Report", 
+                                f"{'\n'.join(report)}\n\n{resumen}")
 
+        except Exception as e:
+            # MANEJO DE ERRORES CRÍTICOS
+            # Registro obligatorio en el archivo log si algo falla en la interfaz
+            logging.error(f"Error crítico en el módulo de resiliencia: {e}")
+            messagebox.showerror("System Error", "An unexpected failure occurred. Please check system.log.")
+            
 # ============================================
 # FUNCIÓN PRINCIPAL
 # ============================================
