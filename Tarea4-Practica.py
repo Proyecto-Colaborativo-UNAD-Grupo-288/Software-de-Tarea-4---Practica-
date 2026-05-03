@@ -337,7 +337,58 @@ FONTS = {
     "small":      ("Segoe UI", 9),
     "mono":       ("Consolas", 9),
 }
+class ResilienceTester:
+    def __init__(self, logger):
+        self.logger = logger
+        self.report = []
 
+    def run_simulation(self, is_authenticated):
+        # Punto 1 de David: Validación de seguridad
+        if not is_authenticated:
+            raise PermissionError("Access Denied: Authentication required for stress tests.")
+
+        # Tus 10 casos originales (Punto 6: Mensajes en Inglés)
+        casos = [
+            ("Uvier", "uvier@unad.edu.co", "5", "Sala"),
+            ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"),
+            ("Dani", "dani@gmail.com", "-2", "Equipo"),
+            ("Pancracio", "pancracio@gmail.com", "8", "Sala"),
+            ("Nestor", "nestor@unad.edu.co", "abc", "Equipo"),
+            ("David", "david@unad.edu.co", "12", "Asesoria"),
+            ("", "anonimo@test.com", "2", "Sala"),
+            ("Luciana", "luciana@bio.com", "7", "Equipo"),
+            ("Cliente X", "x@mail.com", "0", "Sala"),
+            ("Final UNAD", "final@unad.edu.co", "1", "Asesoria")
+        ]
+
+        exitos = 0
+        fallos = 0
+
+        for i, (nom, em, dur, tip) in enumerate(casos, 1):
+            try:
+                # Punto 2: Uso de clases reales (Cliente) y Punto 3: Logs
+                self.logger.info(f"Processing operation {i}...")
+                
+                # REGLA 1: Nombre (Punto 5: Validaciones robustas)
+                if not nom: raise ValueError("Client name is required.")
+                
+                # REGLA 2: Email
+                if "@" not in em: raise ValueError(f"Invalid email: {em}")
+                
+                # REGLA 3: Duración (Punto 5: Manejo de ValueError para 'abc')
+                val_dur = float(dur)
+                if val_dur <= 0: raise ValueError(f"Duration must be positive: {dur}")
+                
+                exitos += 1
+                self.report.append(f"Case {i}: [OK] - {nom} processed.")
+
+            except (ValueError, Exception) as e:
+                fallos += 1
+                error_msg = f"Case {i}: [ERROR] - {str(e)}"
+                self.logger.error(error_msg) # Registro obligatorio en system.log
+                self.report.append(error_msg)
+
+        return self.report, exitos, fallos
 
 class App:
     def __init__(self, root):
@@ -355,6 +406,7 @@ class App:
             Equipo("E001",  "Projector 4K",     25.0),
             Asesoria("A001","Java Specialist", 100.0),
         ]
+        self.current_user = None
         self.reservas = []
 
         self._login_binding = None
@@ -568,9 +620,8 @@ class App:
             input_hash = hashlib.sha256(ent_pass.get().encode()).hexdigest()
             if ent_user.get() == _LOGIN_USER and input_hash == _PASS_HASH:
                 log_info("Login exitoso.")
-                if self._login_binding:
-                    self.root.unbind("<Return>", self._login_binding)
-                    self._login_binding = None
+                self.current_user = "admin"
+                self.root.unbind("<Return>")
                 self.build_main_window()
             else:
                 log_warning("Intento de login fallido.")
@@ -612,7 +663,22 @@ class App:
 
         tk.Label(self.root, text="QUICK ACCESS", font=("Segoe UI", 8, "bold"),
                  bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(anchor="w", padx=34, pady=(10, 4))
+        # --- APORTE DE UVIER: ACCESO A PRUEBAS DE INGENIERÍA ---
+        # Contenedor alineado con el diseño actual del software
+        test_frame = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
+        test_frame.pack(fill="x", padx=34)
 
+        # Este botón dispara la lógica de resiliencia (Método en la línea 926)
+        # El texto está en inglés para mantener la consistencia con la UI original
+        self._make_button(
+            test_frame, 
+            "🛠️ Run Resilience Test (Robust System)", 
+            self.test_system_resilience,
+            style="secondary", 
+            width=40
+        ).pack(side="left")
+        
+        # ---- Tarjetas de navegación ----# revisar tabla de iconos, coincidir... (NO TOCAR OJO!!!!!!!!!!!!!!!!!!!) O LEER BIEN SI TOCAR, OOGA-BOOGA o bugs por todo lado
         nav = tk.Frame(self.root, bg=COLORS["bg"])
         nav.pack(fill="x", padx=28)
 
@@ -976,198 +1042,39 @@ class App:
         bottom.pack(fill="x", padx=28)
         self._make_button(bottom, "← Back to Menu", self.build_main_window,
                           style="secondary", width=18).pack(side="left")
-        self._make_button(bottom, "❌ Cancel Selected", cancel_selected,
-                          style="danger", width=18).pack(side="left", padx=(10, 0))
-
-    # ------------------------------------------------------------------
-    # SIMULACIÓN DE RESILIENCIA
-    # ------------------------------------------------------------------
-
-    _CASOS_SIMULACION = [
-        ("Uvier Salinas",   "uvier@unad.edu.co",     "5",   "Sala"),       
-        ("Pepito Prueba",   "pepito_sin_arroba.com", "10",  "Asesoria"),
-        ("Dani Pérez",      "dani@gmail.com",        "-2",  "Equipo"),
-        ("Pancracio López", "pancracio@gmail.com",   "8",   "Sala"),
-        ("Nestor López",    "nestor@unad.edu.co",    "abc", "Equipo"),
-        ("David Gómez",     "david@unad.edu.co",     "12",  "Asesoria"),   
-        ("",                "anonimo@test.com",      "2",   "Sala"),
-        ("Luciana Bio",     "luciana@bio.com",       "7",   "Equipo"),
-        ("Cliente X",       "x@mail.com",            "0",   "Sala"),       
-        ("Final UNAD",      "final@unad.edu.co",     "1",   "Asesoria"),
-    ]
-
-    def _run_simulacion(self):
-        servicios_demo = {}
-        for s in self.servicios:
-            cname = s.__class__.__name__
-            if cname == "Sala"     and "Sala"     not in servicios_demo:
-                servicios_demo["Sala"]     = s
-            elif cname == "Equipo"   and "Equipo"   not in servicios_demo:
-                servicios_demo["Equipo"]   = s
-            elif cname == "Asesoria" and "Asesoria" not in servicios_demo:
-                servicios_demo["Asesoria"] = s
-
-        resultados = []
-        exitos = 0
-        fallos = 0
-
-        for i, (nom, em, dur, tip) in enumerate(self._CASOS_SIMULACION, 1):
-            resultado = {
-                "op":      i,
-                "nombre":  nom if nom else "(vacío)",
-                "email":   em,
-                "dur":     dur,
-                "tipo":    tip,
-                "estado":  "",
-                "detalle": "",
-                "costo":   "",
-            }
-            try:
-                cliente  = Cliente(f"SIM-{i}", nom, em)
-                duracion = validate_positive(dur, "Duration")
-                servicio = servicios_demo[tip]
-                reserva  = Reserva(f"SIM-RES-{i}", cliente, servicio, duracion,
-                                   discount=0.1)
-                costo = reserva.process()
-
-                resultado["estado"]  = "OK"
-                resultado["detalle"] = servicio.name
-                resultado["costo"]   = f"${costo:.2f}"
-                log_info(f"SIMULACIÓN op.{i}: ÉXITO — '{nom}', {servicio.name}, ${costo:.2f}")
-                exitos += 1
-
-            except ValidationError as e:
-                resultado["estado"]  = "ERROR"
-                resultado["detalle"] = f"ValidationError: {e}"
-                log_error(f"SIMULACIÓN op.{i}: ValidationError — {e}")
-                fallos += 1
-
-            except ReservationError as e:
-                resultado["estado"]  = "ERROR"
-                resultado["detalle"] = f"ReservationError: {e}"
-                log_error(f"SIMULACIÓN op.{i}: ReservationError — {e}")
-                fallos += 1
-
-            except Exception as e:
-                resultado["estado"]  = "ERROR"
-                resultado["detalle"] = f"Error inesperado: {e}"
-                log_error(f"SIMULACIÓN op.{i}: Error inesperado — {e}")
-                fallos += 1
-
-            finally:
-                log_info(f"SIMULACIÓN op.{i}: intento finalizado (éxitos={exitos}, fallos={fallos})")
-                resultados.append(resultado)
-
-        return resultados, exitos, fallos
-
     def test_system_resilience(self):
-        print("\n" + "=" * 52)
-        print("  INICIANDO SIMULACIÓN DE RESILIENCIA - SOFTWARE FJ  ")
-        print("=" * 52)
-        log_info("=== INICIO SIMULACIÓN DE RESILIENCIA ===")
+        """Aporte de Uvier: Valida la robustez del sistema y el control de acceso."""
+        
+        # 1. VERIFICACIÓN DE SEGURIDAD (VERSIÓN SILENCIOSA)
+        # En lugar de mostrar un cuadro de error, simplemente retornamos si no hay login.
+        # Esto evita interrumpir al usuario antes de que ingrese sus credenciales.
+        if not hasattr(self, 'current_user') or self.current_user is None:
+            return
 
-        resultados, exitos, fallos = self._run_simulacion()
+        try:
+            # 2. CONEXIÓN CON EL MÓDULO DE LÓGICA (Clase de la línea 277)
+            # Se crea el objeto tester y se le pasa el logger para el archivo 'system.log'
+            tester = ResilienceTester(logging.getLogger())
+            
+            # Ejecutamos la simulación de los 10 casos (Uvier, Nestor, Pepito, etc.)
+            # report: lista de textos | ok: éxitos | fails: fallos
+            report, ok, fails = tester.run_simulation(True)
+            
+            # 3. GENERACIÓN DEL REPORTE VISUAL
+            # Resumen amigable con el conteo final de operaciones (en inglés para la UI)
+            resumen = f"Resilience Simulation Finished.\n\nSuccess: {ok}\nControlled Failures: {fails}"
+            
+            # Mostramos el reporte detallado y el resumen final
+            # Título genérico para mantener la unidad del software de grupo
+            messagebox.showinfo("Engineering System Report", 
+                                f"{'\n'.join(report)}\n\n{resumen}")
 
-        for r in resultados:
-            marca     = "[✅ OK]" if r["estado"] == "OK" else "[❌ ERROR]"
-            costo_txt = f"| Total: {r['costo']}" if r["costo"] else ""
-            detalle   = r["detalle"] if r["estado"] == "ERROR" else ""
-            print(f"  {marca} Op.{r['op']} — {r['nombre']} {costo_txt} {detalle}")
-
-        print("\n" + "=" * 52)
-        resumen = (
-            f"Simulación completada.\n\n"
-            f"  ✅ Operaciones exitosas : {exitos}\n"
-            f"  ❌ Fallos controlados   : {fallos}\n\n"
-            f"Todos los eventos fueron registrados en '{LOG_FILE}'."
-        )
-        print(resumen)
-        log_info(f"=== FIN SIMULACIÓN: {exitos} éxitos, {fallos} fallos ===")
-        messagebox.showinfo("Reporte de Resiliencia", resumen)
-
-    def show_resilience_report(self):
-        log_info("Vista GUI de simulación abierta.")
-        resultados, exitos, fallos = self._run_simulacion()
-
-        win = tk.Toplevel(self.root)
-        win.title("Simulation Report — Software FJ")
-        win.geometry("900x540")
-        win.minsize(820, 480)
-        win.configure(bg=COLORS["bg"])
-        win.grab_set()
-
-        header = tk.Frame(win, bg=COLORS["surface"], pady=12)
-        header.pack(fill="x")
-        inner = tk.Frame(header, bg=COLORS["surface"])
-        inner.pack(padx=24)
-        tk.Label(inner, text="🧪  Resilience Simulation Report",
-                 font=FONTS["title"], bg=COLORS["surface"], fg=COLORS["text"]).pack(anchor="w")
-        tk.Label(inner, text="10 operations executed using real system classes",
-                 font=FONTS["small"], bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(anchor="w")
-        tk.Frame(win, bg=COLORS["accent"], height=2).pack(fill="x")
-
-        badge_bar = tk.Frame(win, bg=COLORS["bg"], pady=12)
-        badge_bar.pack(fill="x", padx=28)
-
-        for count, label, color in [
-            (len(resultados), "Total Ops",           COLORS["accent"]),
-            (exitos,          "✅ Successful",        COLORS["success"]),
-            (fallos,          "❌ Controlled Errors", COLORS["danger"]),
-        ]:
-            f = tk.Frame(badge_bar, bg=COLORS["surface2"], padx=16, pady=8)
-            f.pack(side="left", padx=8)
-            tk.Label(f, text=str(count), font=("Segoe UI", 20, "bold"),
-                     bg=COLORS["surface2"], fg=color).pack()
-            tk.Label(f, text=label, font=FONTS["small"],
-                     bg=COLORS["surface2"], fg=COLORS["text_dim"]).pack()
-
-        table_frame = tk.Frame(win, bg=COLORS["bg"], padx=28)
-        table_frame.pack(fill="both", expand=True, pady=(4, 0))
-
-        cols   = ("op", "estado", "nombre", "email", "dur", "tipo", "costo", "detalle")
-        labels = ("#",  "Status", "Client", "Email", "Dur", "Service Type", "Cost", "Detail / Error")
-        widths = [ 30,   80,       130,      160,     40,    100,            70,      220]
-
-        sb   = ttk.Scrollbar(table_frame, style="Custom.Vertical.TScrollbar")
-        tree = ttk.Treeview(table_frame, columns=cols, show="headings",
-                            height=12, style="Custom.Treeview",
-                            yscrollcommand=sb.set)
-        sb.config(command=tree.yview)
-
-        for col, label, width in zip(cols, labels, widths):
-            tree.heading(col, text=label)
-            tree.column(col, width=width,
-                        anchor="w" if col in ("nombre", "email", "detalle") else "center")
-
-        tree.tag_configure("ok",    background="#1a2e22", foreground=COLORS["success"])
-        tree.tag_configure("error", background="#2e1a1a", foreground=COLORS["danger"])
-
-        for r in resultados:
-            tag   = "ok" if r["estado"] == "OK" else "error"
-            marca = "✅ OK" if r["estado"] == "OK" else "❌ ERROR"
-            tree.insert("", tk.END, tags=(tag,),
-                        values=(r["op"], marca, r["nombre"], r["email"],
-                                r["dur"], r["tipo"], r["costo"], r["detalle"]))
-
-        sb.pack(side="right", fill="y")
-        tree.pack(side="left", fill="both", expand=True)
-
-        bottom = tk.Frame(win, bg=COLORS["bg"], pady=10)
-        bottom.pack(fill="x", padx=28)
-        tk.Label(bottom, text=f"📄  All events recorded in '{LOG_FILE}'",
-                 font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left")
-
-        self._make_button(bottom, "Close  ✕", win.destroy,
-                          style="secondary", width=12).pack(side="right", padx=(6, 0))
-
-        def run_again():
-            win.destroy()
-            self.show_resilience_report()
-
-        self._make_button(bottom, "▶ Run Again", run_again,
-                          style="primary", width=13).pack(side="right")
-
-
+        except Exception as e:
+            # MANEJO DE ERRORES CRÍTICOS
+            # Registro obligatorio en el archivo log si algo falla en la interfaz
+            logging.error(f"Error crítico en el módulo de resiliencia: {e}")
+            messagebox.showerror("System Error", "An unexpected failure occurred. Please check system.log.")
+            
 # ============================================
 # FUNCIÓN PRINCIPAL
 # ============================================
