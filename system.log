@@ -58,3 +58,12 @@
 2026-04-30 17:27:27,608 - INFO - Login exitoso.
 2026-04-30 17:29:42,432 - INFO - Login exitoso.
 
+2026-05-03 12:41:14,335 - INFO - Login exitoso.
+2026-05-03 12:41:25,666 - ERROR - Error registering client: Invalid email format (expected: user@domain.tld)
+2026-05-03 12:41:34,358 - INFO - Client nestor registered (ID: 2F02C60D).
+2026-05-03 12:41:46,944 - INFO - Reservation 8CFB6422 confirmed
+2026-05-03 12:41:46,945 - INFO - Reservation 8CFB6422 successful. Cost: 0.0
+2026-05-03 12:41:46,945 - INFO - Reservation 8CFB6422 processing attempt finished
+2026-05-03 12:41:50,224 - INFO - Res ID 8CFB6422 created for nestor
+2026-05-03 12:43:10,882 - INFO - Login exitoso.
+2026-05-03 12:43:28,581 - INFO - Client Netstor registered (ID: 70B4C893).
