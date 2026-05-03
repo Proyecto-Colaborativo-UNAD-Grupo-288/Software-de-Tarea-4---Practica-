@@ -920,7 +920,6 @@ class App:
         body = tk.Frame(self.root, bg=COLORS["bg"])
         body.pack(fill="both", expand=True, padx=28, pady=16)
 
-        # Variable para controlar si estamos editando una reserva existente
         if not hasattr(self, '_editing_res_id'):
             self._editing_res_id = None
 
@@ -937,9 +936,8 @@ class App:
 
         cb_cli  = self._make_combobox(form_card, "Client",  row=1, values=cli_labels)
         cb_ser  = self._make_combobox(form_card, "Service", row=2, values=ser_labels)
-        ent_dur = self._make_entry(form_card,    "Duration", row=3)
+        ent_dur = self._make_entry(form_card,    "Duration (Hours)", row=3)
 
-        # Mapeo de las nuevas opciones de descuento solicitadas
         discount_map = {
             "No descuento 0%": 0.0,
             "Clientes frecuentes 5%": 0.05,
@@ -952,33 +950,47 @@ class App:
         cb_dis = self._make_combobox(form_card, "Discount Type", row=4, values=list(discount_map.keys()))
         cb_dis.current(0)
 
+        status_options = [
+            "Pending", "Confirmed", "Cancelled", "Completed", 
+            "No show", "Rescheduled", "On hold", "Expired"
+        ]
+        cb_stat = self._make_combobox(form_card, "Status", row=5, values=status_options)
+        cb_stat.current(0)
+
         def save_res():
             try:
                 dur = float(ent_dur.get())
                 cli_id = cb_cli.get().split("(")[-1].rstrip(")")
                 ser_id = cb_ser.get().split("(")[-1].rstrip(")")
-                
+
                 cli = next((c for c in self.clientes if str(c.id) == cli_id), None)
                 ser = next((s for s in self.servicios if str(s.id) == ser_id), None)
                 discount_val = discount_map[cb_dis.get()]
+                selected_status = cb_stat.get()
 
                 if self._editing_res_id is None:
                     # Crear nueva reserva
                     new_id = generate_id()
                     res = Reserva(new_id, cli, ser, dur, discount=discount_val)
+                    # En lugar de usar .status = x, usamos el atributo interno para evitar el error de setter
+                    res._status = selected_status 
                     self.reservas.append(res)
+                    log_info(f"Reserva creada: {new_id}")
                 else:
                     # Actualizar reserva existente
                     for i, r in enumerate(self.reservas):
                         if str(r.id_reserva) == self._editing_res_id:
-                            self.reservas[i] = Reserva(r.id_reserva, cli, ser, dur, discount=discount_val)
+                            updated_res = Reserva(r.id_reserva, cli, ser, dur, discount=discount_val)
+                            updated_res._status = selected_status
+                            self.reservas[i] = updated_res
                             break
+                    log_info(f"Reserva actualizada: {self._editing_res_id}")
                     self._editing_res_id = None
 
                 messagebox.showinfo("Success", "Reservation saved successfully.")
                 self.manage_reservations()
-
             except Exception as e:
+                log_error(f"Error en reservas: {e}")
                 messagebox.showerror("Error", f"Could not save: {e}")
 
         def delete_res():
@@ -986,12 +998,11 @@ class App:
             if not selected:
                 messagebox.showwarning("Selection", "Please select a reservation to delete.")
                 return
-            
             item = tree.item(selected)
             res_id = str(item['values'][0])
-            
             if messagebox.askyesno("Confirm", f"Delete reservation {res_id}?"):
                 self.reservas = [r for r in self.reservas if str(r.id_reserva) != res_id]
+                log_info(f"Reserva eliminada: {res_id}")
                 self._editing_res_id = None
                 self.manage_reservations()
 
@@ -1001,49 +1012,66 @@ class App:
             item = tree.item(selected)
             self._editing_res_id = str(item['values'][0])
             
-            # Cargar datos en los campos para editar
-            ent_dur.delete(0, tk.END)
-            ent_dur.insert(0, item['values'][4])
+            res_actual = next((r for r in self.reservas if str(r.id_reserva) == self._editing_res_id), None)
             
-            # Cambiar apariencia del botón para indicar edición
-            btn_save.config(text="Update Reservation", bg="#6200EE")
-            lbl_form.config(text=f"EDITING ID: {self._editing_res_id}", fg="#6200EE")
+            if res_actual:
+                ent_dur.delete(0, tk.END)
+                ent_dur.insert(0, str(res_actual._duration))
+                
+                for i, label in enumerate(cli_labels):
+                    if f"({res_actual.cliente.id})" in label:
+                        cb_cli.current(i)
+                
+                for i, label in enumerate(ser_labels):
+                    if f"({res_actual.servicio.id})" in label:
+                        cb_ser.current(i)
+                
+                for i, (key, val) in enumerate(discount_map.items()):
+                    if val == res_actual.discount:
+                        cb_dis.current(i)
+                
+                if res_actual.status in status_options:
+                    idx = status_options.index(res_actual.status)
+                    cb_stat.current(idx)
+            
+            btn_save.config(text="Update Reservation", bg=COLORS["accent2"])
+            lbl_form.config(text=f"EDITING ID: {self._editing_res_id}", fg=COLORS["accent"])
 
-        # Botones de acción del formulario
         btn_save = self._make_button(form_card, "Save Reservation", save_res, style="success")
         btn_save.grid(row=6, column=0, columnspan=2, pady=(15, 0), sticky="ew")
 
         self._make_button(form_card, "Delete Selected", delete_res, style="danger").grid(
             row=7, column=0, columnspan=2, pady=(8, 0), sticky="ew")
 
-        # --- PANEL DERECHO: TABLA DE RESERVAS ---
+        # --- PANEL DERECHO: TABLA ---
         list_card = tk.Frame(body, bg=COLORS["surface"], padx=16, pady=16)
         list_card.pack(side="left", fill="both", expand=True)
 
-        cols = ("ID", "Client", "Service", "Status", "Duration", "Total")
-        tree_frame, tree = self._make_treeview(list_card, cols, cols, [60, 110, 110, 90, 70, 90])
+        cols = ("ID", "Client", "Service", "Status", "Hours", "Discount %", "Total Payment")
+        tree_frame, tree = self._make_treeview(list_card, cols, cols, [60, 100, 100, 80, 60, 90, 100])
         tree_frame.pack(fill="both", expand=True)
         tree.bind("<<TreeviewSelect>>", on_select)
 
-        # Llenado de la tabla con cálculo de total aplicado
         for r in self.reservas:
-            # Cálculo: (Precio * Duración) - Descuento
-            base_price = r.servicio.price if hasattr(r.servicio, 'price') else 0
-            total_calc = (base_price * r._duration) * (1 - r.discount)
+            # Usar r.servicio._base_price para ser consistente con la clase
+            precio_hora = getattr(r.servicio, '_base_price', 0)
+            subtotal = precio_hora * r._duration
+            total_final = subtotal * (1 - r.discount)
+            pct_display = f"{int(r.discount * 100)}%"
             
             tree.insert("", tk.END, values=(
-                r.id_reserva, 
-                r.cliente.name, 
-                r.servicio.name, 
-                r.status, 
-                r._duration, 
-                f"${total_calc:,.2f}"
+                r.id_reserva, r.cliente.name, r.servicio.name, 
+                r.status, r._duration, pct_display, f"${total_final:,.2f}"
             ))
 
         bottom = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
         bottom.pack(fill="x", padx=28)
         self._make_button(bottom, "← Back to Menu", self.build_main_window,
                           style="secondary", width=18).pack(side="left")
+
+
+
+
     def test_system_resilience(self):
         """Aporte de Uvier: Valida la robustez del sistema y el control de acceso."""
         

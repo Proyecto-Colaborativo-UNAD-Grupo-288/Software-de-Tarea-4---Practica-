@@ -67,3 +67,35 @@
 2026-05-03 12:41:50,224 - INFO - Res ID 8CFB6422 created for nestor
 2026-05-03 12:43:10,882 - INFO - Login exitoso.
 2026-05-03 12:43:28,581 - INFO - Client Netstor registered (ID: 70B4C893).
+2026-05-03 13:00:32,709 - INFO - Login exitoso.
+2026-05-03 13:00:47,416 - INFO - Client nestor registered (ID: 1E132535).
+2026-05-03 13:01:04,880 - ERROR - Service operation failed: invalid literal for int() with base 10: 'S001'
+2026-05-03 13:09:29,605 - INFO - Login exitoso.
+2026-05-03 13:09:44,293 - INFO - Client nestor registered (ID: 2C5C5FA2).
+2026-05-03 13:09:53,649 - ERROR - Service operation failed: invalid literal for int() with base 10: 'S001'
+2026-05-03 13:28:54,425 - INFO - Login exitoso.
+2026-05-03 13:29:04,070 - INFO - Client nnestor registered (ID: 1A2C968C).
+2026-05-03 13:31:38,313 - INFO - Login exitoso.
+2026-05-03 13:31:50,563 - ERROR - Error registering client: Invalid email format (expected: user@domain.tld)
+2026-05-03 13:31:55,538 - INFO - Client gdags registered (ID: 20CD5398).
+2026-05-03 13:39:46,269 - INFO - Login exitoso.
+2026-05-03 13:39:57,123 - INFO - Client nestor registered (ID: 2E55A00A).
+2026-05-03 13:40:06,644 - INFO - Client karen registered (ID: 4F2D347F).
+2026-05-03 13:40:28,748 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-03 13:40:38,693 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-03 13:40:50,649 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-03 13:40:56,686 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-03 13:42:22,888 - INFO - Login exitoso.
+2026-05-03 13:42:31,123 - INFO - Client nestor registered (ID: FDFEEE33).
+2026-05-03 13:42:39,167 - INFO - Client karen registered (ID: 6C22DA8B).
+2026-05-03 13:42:59,312 - INFO - Reserva creada: 20BF2CF2
+2026-05-03 13:43:22,901 - INFO - Reserva actualizada: 20BF2CF2
+2026-05-03 13:43:51,993 - INFO - Reserva actualizada: 20BF2CF2
+2026-05-03 13:44:20,115 - INFO - Reserva creada: 13E2259C
+2026-05-03 13:44:33,906 - INFO - Reserva eliminada: 20BF2CF2
+2026-05-03 13:45:17,745 - ERROR - Service operation failed: invalid literal for int() with base 10: 'S001'
+2026-05-03 13:45:40,254 - INFO - Reserva actualizada: 13E2259C
+2026-05-03 13:46:30,880 - INFO - Service ID A001 updated.
+2026-05-03 13:46:46,720 - INFO - Reserva actualizada: 13E2259C
+2026-05-03 13:47:15,828 - INFO - Reserva creada: 4093F3F2
+2026-05-03 13:47:33,060 - INFO - Reserva creada: 56985EFF
