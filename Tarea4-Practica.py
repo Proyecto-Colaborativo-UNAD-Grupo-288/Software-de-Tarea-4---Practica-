@@ -1082,26 +1082,13 @@ class App:
             return
 
         try:
-            # 2. CONEXIÓN CON EL MÓDULO DE LÓGICA (Clase de la línea 277)
-            # Se crea el objeto tester y se le pasa el logger para el archivo 'system.log'
             tester = ResilienceTester(logging.getLogger())
-            
-            # Ejecutamos la simulación de los 10 casos (Uvier, Nestor, Pepito, etc.)
-            # report: lista de textos | ok: éxitos | fails: fallos
             report, ok, fails = tester.run_simulation(True)
-            
-            # 3. GENERACIÓN DEL REPORTE VISUAL
-            # Resumen amigable con el conteo final de operaciones (en inglés para la UI)
             resumen = f"Resilience Simulation Finished.\n\nSuccess: {ok}\nControlled Failures: {fails}"
-            
-            # Mostramos el reporte detallado y el resumen final
-            # Título genérico para mantener la unidad del software de grupo
             messagebox.showinfo("Engineering System Report", 
                                 f"{'\n'.join(report)}\n\n{resumen}")
 
         except Exception as e:
-            # MANEJO DE ERRORES CRÍTICOS
-            # Registro obligatorio en el archivo log si algo falla en la interfaz
             logging.error(f"Error crítico en el módulo de resiliencia: {e}")
             messagebox.showerror("System Error", "An unexpected failure occurred. Please check system.log.")
             
