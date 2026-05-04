@@ -310,7 +310,7 @@ class Reserva:
             log_info(f"Reservation {self.id_reserva} processing attempt finished")
 
 # ============================================
-# INTERFAZ GRÁFICA DE USUARIO (DG180 G.U.I v2.0)
+# INTERFAZ GRÁFICA DE USUARIO (G.U.I v2.0)
 # ============================================
 
 COLORS = {
@@ -343,11 +343,9 @@ class ResilienceTester:
         self.report = []
 
     def run_simulation(self, is_authenticated):
-        # Punto 1 de David: Validación de seguridad
         if not is_authenticated:
             raise PermissionError("Access Denied: Authentication required for stress tests.")
 
-        # Tus 10 casos originales (Punto 6: Mensajes en Inglés)
         casos = [
             ("Uvier", "uvier@unad.edu.co", "5", "Sala"),
             ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"),
@@ -366,16 +364,12 @@ class ResilienceTester:
 
         for i, (nom, em, dur, tip) in enumerate(casos, 1):
             try:
-                # Punto 2: Uso de clases reales (Cliente) y Punto 3: Logs
                 self.logger.info(f"Processing operation {i}...")
                 
-                # REGLA 1: Nombre (Punto 5: Validaciones robustas)
                 if not nom: raise ValueError("Client name is required.")
                 
-                # REGLA 2: Email
                 if "@" not in em: raise ValueError(f"Invalid email: {em}")
                 
-                # REGLA 3: Duración (Punto 5: Manejo de ValueError para 'abc')
                 val_dur = float(dur)
                 if val_dur <= 0: raise ValueError(f"Duration must be positive: {dur}")
                 
@@ -385,7 +379,7 @@ class ResilienceTester:
             except (ValueError, Exception) as e:
                 fallos += 1
                 error_msg = f"Case {i}: [ERROR] - {str(e)}"
-                self.logger.error(error_msg) # Registro obligatorio en system.log
+                self.logger.error(error_msg) 
                 self.report.append(error_msg)
 
         return self.report, exitos, fallos
@@ -663,13 +657,8 @@ class App:
 
         tk.Label(self.root, text="QUICK ACCESS", font=("Segoe UI", 8, "bold"),
                  bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(anchor="w", padx=34, pady=(10, 4))
-        # --- APORTE DE UVIER: ACCESO A PRUEBAS DE INGENIERÍA ---
-        # Contenedor alineado con el diseño actual del software
         test_frame = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
         test_frame.pack(fill="x", padx=34)
-
-        # Este botón dispara la lógica de resiliencia (Método en la línea 926)
-        # El texto está en inglés para mantener la consistencia con la UI original
         self._make_button(
             test_frame, 
             "🛠️ Run Resilience Test (Robust System)", 
@@ -678,7 +667,6 @@ class App:
             width=40
         ).pack(side="left")
         
-        # ---- Tarjetas de navegación ----# revisar tabla de iconos, coincidir... (NO TOCAR OJO!!!!!!!!!!!!!!!!!!!) O LEER BIEN SI TOCAR, OOGA-BOOGA o bugs por todo lado
         nav = tk.Frame(self.root, bg=COLORS["bg"])
         nav.pack(fill="x", padx=28)
 
@@ -923,7 +911,6 @@ class App:
         if not hasattr(self, '_editing_res_id'):
             self._editing_res_id = None
 
-        # --- PANEL IZQUIERDO: FORMULARIO ---
         form_card = self._make_card(body)
         form_card.pack(side="left", fill="y", padx=(0, 12))
 
@@ -969,15 +956,12 @@ class App:
                 selected_status = cb_stat.get()
 
                 if self._editing_res_id is None:
-                    # Crear nueva reserva
                     new_id = generate_id()
                     res = Reserva(new_id, cli, ser, dur, discount=discount_val)
-                    # En lugar de usar .status = x, usamos el atributo interno para evitar el error de setter
                     res._status = selected_status 
                     self.reservas.append(res)
                     log_info(f"Reserva creada: {new_id}")
                 else:
-                    # Actualizar reserva existente
                     for i, r in enumerate(self.reservas):
                         if str(r.id_reserva) == self._editing_res_id:
                             updated_res = Reserva(r.id_reserva, cli, ser, dur, discount=discount_val)
@@ -1043,7 +1027,6 @@ class App:
         self._make_button(form_card, "Delete Selected", delete_res, style="danger").grid(
             row=7, column=0, columnspan=2, pady=(8, 0), sticky="ew")
 
-        # --- PANEL DERECHO: TABLA ---
         list_card = tk.Frame(body, bg=COLORS["surface"], padx=16, pady=16)
         list_card.pack(side="left", fill="both", expand=True)
 
@@ -1053,7 +1036,6 @@ class App:
         tree.bind("<<TreeviewSelect>>", on_select)
 
         for r in self.reservas:
-            # Usar r.servicio._base_price para ser consistente con la clase
             precio_hora = getattr(r.servicio, '_base_price', 0)
             subtotal = precio_hora * r._duration
             total_final = subtotal * (1 - r.discount)
@@ -1073,11 +1055,6 @@ class App:
 
 
     def test_system_resilience(self):
-        """Aporte de Uvier: Valida la robustez del sistema y el control de acceso."""
-        
-        # 1. VERIFICACIÓN DE SEGURIDAD (VERSIÓN SILENCIOSA)
-        # En lugar de mostrar un cuadro de error, simplemente retornamos si no hay login.
-        # Esto evita interrumpir al usuario antes de que ingrese sus credenciales.
         if not hasattr(self, 'current_user') or self.current_user is None:
             return
 
