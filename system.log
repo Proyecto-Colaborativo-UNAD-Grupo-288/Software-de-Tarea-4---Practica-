@@ -99,3 +99,21 @@
 2026-05-03 13:46:46,720 - INFO - Reserva actualizada: 13E2259C
 2026-05-03 13:47:15,828 - INFO - Reserva creada: 4093F3F2
 2026-05-03 13:47:33,060 - INFO - Reserva creada: 56985EFF
+2026-05-04 22:27:56,482 - INFO - Login exitoso.
+2026-05-04 22:28:12,159 - INFO - Client nestor registered (ID: 96BA8555).
+2026-05-04 22:28:22,868 - INFO - Client karen registered (ID: DF5BB373).
+2026-05-04 22:29:08,389 - INFO - Login exitoso.
+2026-05-04 22:29:33,023 - INFO - Login exitoso.
+2026-05-04 22:29:47,350 - INFO - Client nestor registered (ID: EAC3A9C2).
+2026-05-04 22:30:05,119 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-04 22:30:15,665 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-04 22:30:20,630 - ERROR - Error en reservas: property 'status' of 'Reserva' object has no setter
+2026-05-04 22:30:47,354 - INFO - Login exitoso.
+2026-05-04 22:30:55,655 - INFO - Client nestor registered (ID: E12BCE50).
+2026-05-04 22:31:32,751 - INFO - Login exitoso.
+2026-05-04 22:31:42,563 - INFO - Client nesfdj registered (ID: 7FCC5A32).
+2026-05-04 22:31:54,981 - INFO - Reserva creada: 686F1F88
+2026-05-04 22:32:10,494 - INFO - Reserva creada: CC7EDFC3
+2026-05-04 22:46:35,648 - INFO - Login exitoso.
+2026-05-04 22:46:44,454 - INFO - Client nestor registered (ID: 0CE07F1C).
+2026-05-04 22:48:19,775 - WARNING - Reserva 8AFC8E09 eliminada.

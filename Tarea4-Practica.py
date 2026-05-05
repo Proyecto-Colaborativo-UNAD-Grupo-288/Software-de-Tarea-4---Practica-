@@ -310,7 +310,7 @@ class Reserva:
             log_info(f"Reservation {self.id_reserva} processing attempt finished")
 
 # ============================================
-# INTERFAZ GRÁFICA DE USUARIO (G.U.I v2.0)
+# INTERFAZ GRÁFICA DE USUARIO (DG180 G.U.I v2.0)
 # ============================================
 
 COLORS = {
@@ -343,9 +343,11 @@ class ResilienceTester:
         self.report = []
 
     def run_simulation(self, is_authenticated):
+        # Punto 1 de David: Validación de seguridad
         if not is_authenticated:
             raise PermissionError("Access Denied: Authentication required for stress tests.")
 
+        # Tus 10 casos originales (Punto 6: Mensajes en Inglés)
         casos = [
             ("Uvier", "uvier@unad.edu.co", "5", "Sala"),
             ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"),
@@ -364,12 +366,16 @@ class ResilienceTester:
 
         for i, (nom, em, dur, tip) in enumerate(casos, 1):
             try:
+                # Punto 2: Uso de clases reales (Cliente) y Punto 3: Logs
                 self.logger.info(f"Processing operation {i}...")
                 
+                # REGLA 1: Nombre (Punto 5: Validaciones robustas)
                 if not nom: raise ValueError("Client name is required.")
                 
+                # REGLA 2: Email
                 if "@" not in em: raise ValueError(f"Invalid email: {em}")
                 
+                # REGLA 3: Duración (Punto 5: Manejo de ValueError para 'abc')
                 val_dur = float(dur)
                 if val_dur <= 0: raise ValueError(f"Duration must be positive: {dur}")
                 
@@ -379,7 +385,7 @@ class ResilienceTester:
             except (ValueError, Exception) as e:
                 fallos += 1
                 error_msg = f"Case {i}: [ERROR] - {str(e)}"
-                self.logger.error(error_msg) 
+                self.logger.error(error_msg) # Registro obligatorio en system.log
                 self.report.append(error_msg)
 
         return self.report, exitos, fallos
@@ -657,8 +663,13 @@ class App:
 
         tk.Label(self.root, text="QUICK ACCESS", font=("Segoe UI", 8, "bold"),
                  bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(anchor="w", padx=34, pady=(10, 4))
+        # --- APORTE DE UVIER: ACCESO A PRUEBAS DE INGENIERÍA ---
+        # Contenedor alineado con el diseño actual del software
         test_frame = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
         test_frame.pack(fill="x", padx=34)
+
+        # Este botón dispara la lógica de resiliencia (Método en la línea 926)
+        # El texto está en inglés para mantener la consistencia con la UI original
         self._make_button(
             test_frame, 
             "🛠️ Run Resilience Test (Robust System)", 
@@ -667,6 +678,7 @@ class App:
             width=40
         ).pack(side="left")
         
+        # ---- Tarjetas de navegación ----# revisar tabla de iconos, coincidir... (NO TOCAR OJO!!!!!!!!!!!!!!!!!!!) O LEER BIEN SI TOCAR, OOGA-BOOGA o bugs por todo lado
         nav = tk.Frame(self.root, bg=COLORS["bg"])
         nav.pack(fill="x", padx=28)
 
@@ -898,174 +910,197 @@ class App:
 
     def manage_reservations(self):
         self.clear_screen()
-        self._make_header(self.root, "📋  Reservation Management",
-                          "Create, update or remove reservations and track history")
+        
+        self._make_header(self.root, "📋  Panel de Control de Reservas", "Software FJ v2.0 — Gestión de Ingeniería")
 
-        if not self.clientes:
-            messagebox.showwarning("Warning", "Please register at least one client first.")
+        if not self.clientes or not self.servicios:
+            messagebox.showwarning("Aviso", "Registre clientes y servicios antes de gestionar reservas.")
             return self.build_main_window()
 
-        body = tk.Frame(self.root, bg=COLORS["bg"])
-        body.pack(fill="both", expand=True, padx=28, pady=16)
+        
+        stats_frame = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
+        stats_frame.pack(fill="x", padx=32)
 
-        if not hasattr(self, '_editing_res_id'):
-            self._editing_res_id = None
+        total_money = sum((r.servicio.base_price * r._duration) * (1 - r.discount) for r in self.reservas)
+        pendientes = len([r for r in self.reservas if r.status == "Pending"])
+        completas = len([r for r in self.reservas if r.status == "Completed"])
 
-        form_card = self._make_card(body)
-        form_card.pack(side="left", fill="y", padx=(0, 12))
+        self._status_badge(stats_frame, len(self.reservas), "Total Reservas").pack(side="left", padx=5)
+        self._status_badge(stats_frame, pendientes, "Pendientes").pack(side="left", padx=5)
+        self._status_badge(stats_frame, completas, "Completadas").pack(side="left", padx=5)
+        self._status_badge(stats_frame, f"${total_money:,.2f}", "Total Ganado").pack(side="left", padx=5)
 
-        lbl_form = tk.Label(form_card, text="RESERVATION DETAILS", font=("Segoe UI", 8, "bold"),
-                          bg=COLORS["surface"], fg=COLORS["text_dim"])
-        lbl_form.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
+        
+        actions_bar = tk.Frame(self.root, bg=COLORS["bg"], pady=15)
+        actions_bar.pack(fill="x", padx=32)
+
+        
+        self._make_button(actions_bar, "➕ Nueva Reserva", self.open_reserva_modal, style="success", width=18).pack(side="left")
+
+       
+        tk.Label(actions_bar, text="🔍 Buscar:", font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left", padx=(20, 5))
+        self.search_var = tk.StringVar()
+        ent_search = tk.Entry(actions_bar, textvariable=self.search_var, font=FONTS["small"], bg=COLORS["input_bg"], fg=COLORS["text"], relief="flat", width=25)
+        ent_search.pack(side="left", padx=5, ipady=4)
+        self.search_var.trace_add("write", lambda *args: self.refresh_reserva_table())
+
+        list_card = tk.Frame(self.root, bg=COLORS["surface"], padx=15, pady=15)
+        list_card.pack(fill="both", expand=True, padx=32, pady=(0, 20))
+
+        cols = ("ID", "Cliente", "Servicio", "Fecha", "Hora", "Dur", "Subtotal", "Total", "Status", "Acciones")
+        widths = [60, 110, 110, 90, 60, 40, 80, 80, 90, 60]
+        tree_frame, self.res_tree = self._make_treeview(list_card, cols, cols, widths, height=12)
+        tree_frame.pack(fill="both", expand=True)
+
+        
+        self.res_tree.bind("<Button-1>", self.handle_table_click)
+        self.refresh_reserva_table()
+
+        bottom = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
+        bottom.pack(fill="x", padx=32)
+        self._make_button(bottom, "← Volver al Menú", self.build_main_window, style="secondary", width=16).pack(side="left")
+
+    def refresh_reserva_table(self):
+        for item in self.res_tree.get_children():
+            self.res_tree.delete(item)
+        
+        search_query = self.search_var.get().lower()
+        
+        for i, r in enumerate(self.reservas):
+            if search_query and search_query not in r.cliente.name.lower() and search_query not in r.servicio.name.lower():
+                continue
+
+            subtotal = r.servicio.base_price * r._duration
+            total_final = subtotal * (1 - r.discount)
+            tag = "even" if i % 2 == 0 else "odd"
+            
+            self.res_tree.insert("", tk.END, values=(
+                r.id_reserva, r.cliente.name, r.servicio.name,
+                r.date.strftime("%Y-%m-%d"), r.date.strftime("%H:%M"), 
+                r._duration, f"${subtotal:,.2f}", f"${total_final:,.2f}", r.status, "⋮"
+            ), tags=(tag,))
+
+    def handle_table_click(self, event):
+        item_id = self.res_tree.identify_row(event.y)
+        column = self.res_tree.identify_column(event.x)
+        
+        if item_id and column == "#10": # Columna Acciones
+            res_id = self.res_tree.item(item_id)['values'][0]
+            res_obj = next((r for r in self.reservas if r.id_reserva == res_id), None)
+            
+            menu = tk.Menu(self.root, tearoff=0, bg=COLORS["surface2"], fg=COLORS["text"])
+            # 5. Llamar ventana de editar con datos cargados
+            menu.add_command(label="✏️ Actualizar", command=lambda: self.open_reserva_modal(res_obj))
+            # 6. Confirmación de eliminación
+            menu.add_command(label="🗑️ Eliminar", command=lambda: self.confirm_deletion(res_obj))
+            menu.post(event.x_root, event.y_root)
+
+    def confirm_deletion(self, res_obj):
+        if messagebox.askyesno("Confirmar", f"¿Está seguro de eliminar la reserva {res_obj.id_reserva}?"):
+            self.reservas.remove(res_obj)
+            log_warning(f"Reserva {res_obj.id_reserva} eliminada.")
+            self.manage_reservations()
+
+    
+    def open_reserva_modal(self, edit_obj=None):
+        modal = tk.Toplevel(self.root)
+        modal.title("Reserva - Software FJ" if not edit_obj else "Editar Reserva")
+        modal.geometry("450x600")
+        modal.configure(bg=COLORS["bg"])
+        modal.transient(self.root)
+        modal.grab_set()
+
+        self._make_header(modal, "📝 Formulario Reserva")
+        container = tk.Frame(modal, bg=COLORS["surface"], padx=20, pady=20)
+        container.pack(fill="both", expand=True, padx=20, pady=20)
 
         cli_labels = [f"{c.name} ({c.id})" for c in self.clientes]
         ser_labels = [f"{s.name} ({s.id})" for s in self.servicios]
 
-        cb_cli  = self._make_combobox(form_card, "Client",  row=1, values=cli_labels)
-        cb_ser  = self._make_combobox(form_card, "Service", row=2, values=ser_labels)
-        ent_dur = self._make_entry(form_card,    "Duration (Hours)", row=3)
+        cb_cli = self._make_combobox(container, "Cliente", 0, cli_labels)
+        cb_ser = self._make_combobox(container, "Servicio", 1, ser_labels)
+        ent_dur = self._make_entry(container, "Duración (Horas)", 2)
+        
+        # 2. Campos de Fecha y Hora
+        ent_date = self._make_entry(container, "Fecha (AAAA-MM-DD)", 3)
+        ent_time = self._make_entry(container, "Hora (HH:MM)", 4)
+        
+        discount_map = {"No descuento 0%": 0.0, "Frecuente 5%": 0.05, "Empresa 12%": 0.12, "Cortesia 100%": 1.0}
+        cb_dis = self._make_combobox(container, "Descuento", 5, list(discount_map.keys()))
+        
+        status_opts = ["Pending", "Confirmed", "Cancelled", "Completed"]
+        cb_stat = self._make_combobox(container, "Estatus", 6, status_opts)
 
-        discount_map = {
-            "No descuento 0%": 0.0,
-            "Clientes frecuentes 5%": 0.05,
-            "Mayorista 8%": 0.08,
-            "Proveedores 10%": 0.10,
-            "Empresas con convenio 12%": 0.12,
-            "Trabajadores internos 15%": 0.15,
-            "Cortesia total 100%": 1.0
-        }
-        cb_dis = self._make_combobox(form_card, "Discount Type", row=4, values=list(discount_map.keys()))
-        cb_dis.current(0)
+       
+        if edit_obj:
+            ent_dur.insert(0, str(edit_obj._duration))
+            ent_date.insert(0, edit_obj.date.strftime("%Y-%m-%d"))
+            ent_time.insert(0, edit_obj.date.strftime("%H:%M"))
+            cb_stat.set(edit_obj.status)
+            for i, label in enumerate(cli_labels):
+                if f"({edit_obj.cliente.id})" in label: cb_cli.current(i)
+            for i, label in enumerate(ser_labels):
+                if f"({edit_obj.servicio.id})" in label: cb_ser.current(i)
 
-        status_options = [
-            "Pending", "Confirmed", "Cancelled", "Completed", 
-            "No show", "Rescheduled", "On hold", "Expired"
-        ]
-        cb_stat = self._make_combobox(form_card, "Status", row=5, values=status_options)
-        cb_stat.current(0)
-
-        def save_res():
+        def save():
             try:
                 dur = float(ent_dur.get())
-                cli_id = cb_cli.get().split("(")[-1].rstrip(")")
-                ser_id = cb_ser.get().split("(")[-1].rstrip(")")
-
-                cli = next((c for c in self.clientes if str(c.id) == cli_id), None)
-                ser = next((s for s in self.servicios if str(s.id) == ser_id), None)
-                discount_val = discount_map[cb_dis.get()]
-                selected_status = cb_stat.get()
-
-                if self._editing_res_id is None:
-                    new_id = generate_id()
-                    res = Reserva(new_id, cli, ser, dur, discount=discount_val)
-                    res._status = selected_status 
-                    self.reservas.append(res)
-                    log_info(f"Reserva creada: {new_id}")
+                cli_id = cb_cli.get().split("(")[-1].strip(")")
+                ser_id = cb_ser.get().split("(")[-1].strip(")")
+                cli = self.get_cliente_by_id(cli_id)
+                ser = self.get_servicio_by_id(ser_id)
+                
+                if edit_obj:
+                    edit_obj._cliente = cli
+                    edit_obj._servicio = ser
+                    edit_obj._duration = dur
+                    edit_obj._discount = discount_map[cb_dis.get()]
+                    edit_obj._status = cb_stat.get()
                 else:
-                    for i, r in enumerate(self.reservas):
-                        if str(r.id_reserva) == self._editing_res_id:
-                            updated_res = Reserva(r.id_reserva, cli, ser, dur, discount=discount_val)
-                            updated_res._status = selected_status
-                            self.reservas[i] = updated_res
-                            break
-                    log_info(f"Reserva actualizada: {self._editing_res_id}")
-                    self._editing_res_id = None
-
-                messagebox.showinfo("Success", "Reservation saved successfully.")
+                    res = Reserva(generate_id(), cli, ser, dur, discount=discount_map[cb_dis.get()])
+                    res._status = cb_stat.get()
+                    self.reservas.append(res)
+                
+                modal.destroy()
                 self.manage_reservations()
             except Exception as e:
-                log_error(f"Error en reservas: {e}")
-                messagebox.showerror("Error", f"Could not save: {e}")
+                messagebox.showerror("Error", str(e))
 
-        def delete_res():
-            selected = tree.selection()
-            if not selected:
-                messagebox.showwarning("Selection", "Please select a reservation to delete.")
-                return
-            item = tree.item(selected)
-            res_id = str(item['values'][0])
-            if messagebox.askyesno("Confirm", f"Delete reservation {res_id}?"):
-                self.reservas = [r for r in self.reservas if str(r.id_reserva) != res_id]
-                log_info(f"Reserva eliminada: {res_id}")
-                self._editing_res_id = None
-                self.manage_reservations()
-
-        def on_select(event):
-            selected = tree.selection()
-            if not selected: return
-            item = tree.item(selected)
-            self._editing_res_id = str(item['values'][0])
-            
-            res_actual = next((r for r in self.reservas if str(r.id_reserva) == self._editing_res_id), None)
-            
-            if res_actual:
-                ent_dur.delete(0, tk.END)
-                ent_dur.insert(0, str(res_actual._duration))
-                
-                for i, label in enumerate(cli_labels):
-                    if f"({res_actual.cliente.id})" in label:
-                        cb_cli.current(i)
-                
-                for i, label in enumerate(ser_labels):
-                    if f"({res_actual.servicio.id})" in label:
-                        cb_ser.current(i)
-                
-                for i, (key, val) in enumerate(discount_map.items()):
-                    if val == res_actual.discount:
-                        cb_dis.current(i)
-                
-                if res_actual.status in status_options:
-                    idx = status_options.index(res_actual.status)
-                    cb_stat.current(idx)
-            
-            btn_save.config(text="Update Reservation", bg=COLORS["accent2"])
-            lbl_form.config(text=f"EDITING ID: {self._editing_res_id}", fg=COLORS["accent"])
-
-        btn_save = self._make_button(form_card, "Save Reservation", save_res, style="success")
-        btn_save.grid(row=6, column=0, columnspan=2, pady=(15, 0), sticky="ew")
-
-        self._make_button(form_card, "Delete Selected", delete_res, style="danger").grid(
-            row=7, column=0, columnspan=2, pady=(8, 0), sticky="ew")
-
-        list_card = tk.Frame(body, bg=COLORS["surface"], padx=16, pady=16)
-        list_card.pack(side="left", fill="both", expand=True)
-
-        cols = ("ID", "Client", "Service", "Status", "Hours", "Discount %", "Total Payment")
-        tree_frame, tree = self._make_treeview(list_card, cols, cols, [60, 100, 100, 80, 60, 90, 100])
-        tree_frame.pack(fill="both", expand=True)
-        tree.bind("<<TreeviewSelect>>", on_select)
-
-        for r in self.reservas:
-            precio_hora = getattr(r.servicio, '_base_price', 0)
-            subtotal = precio_hora * r._duration
-            total_final = subtotal * (1 - r.discount)
-            pct_display = f"{int(r.discount * 100)}%"
-            
-            tree.insert("", tk.END, values=(
-                r.id_reserva, r.cliente.name, r.servicio.name, 
-                r.status, r._duration, pct_display, f"${total_final:,.2f}"
-            ))
-
-        bottom = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
-        bottom.pack(fill="x", padx=28)
-        self._make_button(bottom, "← Back to Menu", self.build_main_window,
-                          style="secondary", width=18).pack(side="left")
+        self._make_button(container, "Confirmar Registro", save, style="success").grid(row=7, column=0, columnspan=2, pady=20)
 
 
-
+#############
 
     def test_system_resilience(self):
+        """Aporte de Uvier: Valida la robustez del sistema y el control de acceso."""
+        
+        # 1. VERIFICACIÓN DE SEGURIDAD (VERSIÓN SILENCIOSA)
+        # En lugar de mostrar un cuadro de error, simplemente retornamos si no hay login.
+        # Esto evita interrumpir al usuario antes de que ingrese sus credenciales.
         if not hasattr(self, 'current_user') or self.current_user is None:
             return
 
         try:
+            # 2. CONEXIÓN CON EL MÓDULO DE LÓGICA (Clase de la línea 277)
+            # Se crea el objeto tester y se le pasa el logger para el archivo 'system.log'
             tester = ResilienceTester(logging.getLogger())
+            
+            # Ejecutamos la simulación de los 10 casos (Uvier, Nestor, Pepito, etc.)
+            # report: lista de textos | ok: éxitos | fails: fallos
             report, ok, fails = tester.run_simulation(True)
+            
+            # 3. GENERACIÓN DEL REPORTE VISUAL
+            # Resumen amigable con el conteo final de operaciones (en inglés para la UI)
             resumen = f"Resilience Simulation Finished.\n\nSuccess: {ok}\nControlled Failures: {fails}"
+            
+            # Mostramos el reporte detallado y el resumen final
+            # Título genérico para mantener la unidad del software de grupo
             messagebox.showinfo("Engineering System Report", 
                                 f"{'\n'.join(report)}\n\n{resumen}")
 
         except Exception as e:
+            # MANEJO DE ERRORES CRÍTICOS
+            # Registro obligatorio en el archivo log si algo falla en la interfaz
             logging.error(f"Error crítico en el módulo de resiliencia: {e}")
             messagebox.showerror("System Error", "An unexpected failure occurred. Please check system.log.")
             
