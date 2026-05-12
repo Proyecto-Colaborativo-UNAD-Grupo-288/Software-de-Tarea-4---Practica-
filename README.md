@@ -5,7 +5,9 @@ Espacio de trabajo destinado para el desarrollo de la tarea 4, practicas simulad
 
 Unicos autores:
 
-David Andrés Gómez Castillo 
-Nestor Andrés López Salamanca 
-Uvier Asdrubal Salinas Losada 
+1. David Andrés Gómez Castillo 
+
+2. Nestor Andrés López Salamanca 
+
+3. Uvier Asdrubal Salinas Losada 
 
