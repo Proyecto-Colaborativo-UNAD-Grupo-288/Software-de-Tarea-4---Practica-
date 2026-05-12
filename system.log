@@ -99,3 +99,218 @@
 2026-05-03 13:46:46,720 - INFO - Reserva actualizada: 13E2259C
 2026-05-03 13:47:15,828 - INFO - Reserva creada: 4093F3F2
 2026-05-03 13:47:33,060 - INFO - Reserva creada: 56985EFF
+2026-05-11 21:04:37,680 - INFO - Login exitoso.
+2026-05-11 21:04:43,238 - INFO - [ResilienceTester] Processing operation 1: Uvier Salinas / Sala
+2026-05-11 21:04:43,238 - INFO - Reservation DEB00C08 confirmed
+2026-05-11 21:04:43,239 - DEBUG - calculate_total: base=250.0 discount=0.0 tax=0.0 total=250.0
+2026-05-11 21:04:43,239 - INFO - Reservation DEB00C08 successful. Cost: $250.00
+2026-05-11 21:04:43,239 - INFO - Reservation DEB00C08 processing attempt finished
+2026-05-11 21:04:43,239 - INFO - [ResilienceTester] Case 01: [OK] — Uvier Salinas | Room Service: Sala Simulación A ($50.00/hr) | Duration: 5 | Total: $250.00
+2026-05-11 21:04:43,239 - INFO - [ResilienceTester] Processing operation 2: Pepito Prueba / Asesoria
+2026-05-11 21:04:43,239 - ERROR - [ResilienceTester] Case 02: [ValidationError] — Cannot set email for client '82433597': Invalid email format (expected: user@domain.tld)
+2026-05-11 21:04:43,239 - INFO - [ResilienceTester] Processing operation 3: Daniela Mora / Equipo
+2026-05-11 21:04:43,239 - ERROR - [ResilienceTester] Case 03: [ValidationError] — Duration must be positive (got -2.0)
+2026-05-11 21:04:43,239 - INFO - [ResilienceTester] Processing operation 4: Pancracio Gil / Sala
+2026-05-11 21:04:43,239 - INFO - Reservation E89EEE1C confirmed
+2026-05-11 21:04:43,239 - DEBUG - calculate_total: base=400.0 discount=0.0 tax=0.0 total=400.0
+2026-05-11 21:04:43,239 - INFO - Reservation E89EEE1C successful. Cost: $400.00
+2026-05-11 21:04:43,239 - INFO - Reservation E89EEE1C processing attempt finished
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Case 04: [OK] — Pancracio Gil | Room Service: Sala Simulación A ($50.00/hr) | Duration: 8 | Total: $400.00
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Processing operation 5: Nestor Lopez / Equipo
+2026-05-11 21:04:43,240 - ERROR - [ResilienceTester] Case 05: [UnexpectedError] — ValueError: could not convert string to float: 'abc'
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Processing operation 6: David Gomez / Asesoria
+2026-05-11 21:04:43,240 - INFO - Reservation 5645A795 confirmed
+2026-05-11 21:04:43,240 - DEBUG - calculate_total: base=1440.0 discount=0.0 tax=0.0 total=1440.0
+2026-05-11 21:04:43,240 - INFO - Reservation 5645A795 successful. Cost: $1440.00
+2026-05-11 21:04:43,240 - INFO - Reservation 5645A795 processing attempt finished
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Case 06: [OK] — David Gomez | Consulting Service: Python Avanzado ($120.00/session) | Duration: 12 | Total: $1440.00
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Processing operation 7:  / Sala
+2026-05-11 21:04:43,240 - ERROR - [ResilienceTester] Case 07: [ValidationError] — Name must be a non-empty string
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Processing operation 8: Luciana Perez / Equipo
+2026-05-11 21:04:43,240 - INFO - Reservation DE3C2A85 confirmed
+2026-05-11 21:04:43,240 - DEBUG - calculate_total: base=210.0 discount=0.0 tax=0.0 total=210.0
+2026-05-11 21:04:43,240 - INFO - Reservation DE3C2A85 successful. Cost: $210.00
+2026-05-11 21:04:43,240 - INFO - Reservation DE3C2A85 processing attempt finished
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Case 08: [OK] — Luciana Perez | Equipment Service: Laptop HP Sim ($30.00/day) | Duration: 7 | Total: $210.00
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Processing operation 9: Cliente X / Sala
+2026-05-11 21:04:43,240 - ERROR - [ResilienceTester] Case 09: [ValidationError] — Duration must be positive (got 0.0)
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Processing operation 10: Final UNAD / Asesoria
+2026-05-11 21:04:43,240 - INFO - Reservation 50B867FD confirmed
+2026-05-11 21:04:43,240 - DEBUG - calculate_total: base=120.0 discount=0.0 tax=0.0 total=120.0
+2026-05-11 21:04:43,240 - INFO - Reservation 50B867FD successful. Cost: $120.00
+2026-05-11 21:04:43,240 - INFO - Reservation 50B867FD processing attempt finished
+2026-05-11 21:04:43,240 - INFO - [ResilienceTester] Case 10: [OK] — Final UNAD | Consulting Service: Python Avanzado ($120.00/session) | Duration: 1 | Total: $120.00
+2026-05-11 21:04:49,358 - INFO - [ResilienceTester] Processing operation 1: Uvier Salinas / Sala
+2026-05-11 21:04:49,359 - INFO - Reservation 5F439D90 confirmed
+2026-05-11 21:04:49,359 - DEBUG - calculate_total: base=250.0 discount=0.0 tax=0.0 total=250.0
+2026-05-11 21:04:49,359 - INFO - Reservation 5F439D90 successful. Cost: $250.00
+2026-05-11 21:04:49,359 - INFO - Reservation 5F439D90 processing attempt finished
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Case 01: [OK] — Uvier Salinas | Room Service: Sala Simulación A ($50.00/hr) | Duration: 5 | Total: $250.00
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Processing operation 2: Pepito Prueba / Asesoria
+2026-05-11 21:04:49,359 - ERROR - [ResilienceTester] Case 02: [ValidationError] — Cannot set email for client '922EA6EF': Invalid email format (expected: user@domain.tld)
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Processing operation 3: Daniela Mora / Equipo
+2026-05-11 21:04:49,359 - ERROR - [ResilienceTester] Case 03: [ValidationError] — Duration must be positive (got -2.0)
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Processing operation 4: Pancracio Gil / Sala
+2026-05-11 21:04:49,359 - INFO - Reservation 781F9CFD confirmed
+2026-05-11 21:04:49,359 - DEBUG - calculate_total: base=400.0 discount=0.0 tax=0.0 total=400.0
+2026-05-11 21:04:49,359 - INFO - Reservation 781F9CFD successful. Cost: $400.00
+2026-05-11 21:04:49,359 - INFO - Reservation 781F9CFD processing attempt finished
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Case 04: [OK] — Pancracio Gil | Room Service: Sala Simulación A ($50.00/hr) | Duration: 8 | Total: $400.00
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Processing operation 5: Nestor Lopez / Equipo
+2026-05-11 21:04:49,359 - ERROR - [ResilienceTester] Case 05: [UnexpectedError] — ValueError: could not convert string to float: 'abc'
+2026-05-11 21:04:49,359 - INFO - [ResilienceTester] Processing operation 6: David Gomez / Asesoria
+2026-05-11 21:04:49,359 - INFO - Reservation 8431E623 confirmed
+2026-05-11 21:04:49,359 - DEBUG - calculate_total: base=1440.0 discount=0.0 tax=0.0 total=1440.0
+2026-05-11 21:04:49,359 - INFO - Reservation 8431E623 successful. Cost: $1440.00
+2026-05-11 21:04:49,360 - INFO - Reservation 8431E623 processing attempt finished
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Case 06: [OK] — David Gomez | Consulting Service: Python Avanzado ($120.00/session) | Duration: 12 | Total: $1440.00
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Processing operation 7:  / Sala
+2026-05-11 21:04:49,360 - ERROR - [ResilienceTester] Case 07: [ValidationError] — Name must be a non-empty string
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Processing operation 8: Luciana Perez / Equipo
+2026-05-11 21:04:49,360 - INFO - Reservation 57A29A0E confirmed
+2026-05-11 21:04:49,360 - DEBUG - calculate_total: base=210.0 discount=0.0 tax=0.0 total=210.0
+2026-05-11 21:04:49,360 - INFO - Reservation 57A29A0E successful. Cost: $210.00
+2026-05-11 21:04:49,360 - INFO - Reservation 57A29A0E processing attempt finished
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Case 08: [OK] — Luciana Perez | Equipment Service: Laptop HP Sim ($30.00/day) | Duration: 7 | Total: $210.00
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Processing operation 9: Cliente X / Sala
+2026-05-11 21:04:49,360 - ERROR - [ResilienceTester] Case 09: [ValidationError] — Duration must be positive (got 0.0)
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Processing operation 10: Final UNAD / Asesoria
+2026-05-11 21:04:49,360 - INFO - Reservation 18F09DD0 confirmed
+2026-05-11 21:04:49,360 - DEBUG - calculate_total: base=120.0 discount=0.0 tax=0.0 total=120.0
+2026-05-11 21:04:49,360 - INFO - Reservation 18F09DD0 successful. Cost: $120.00
+2026-05-11 21:04:49,360 - INFO - Reservation 18F09DD0 processing attempt finished
+2026-05-11 21:04:49,360 - INFO - [ResilienceTester] Case 10: [OK] — Final UNAD | Consulting Service: Python Avanzado ($120.00/session) | Duration: 1 | Total: $120.00
+2026-05-11 21:05:05,086 - INFO - Client david registered (ID: 159BB361).
+2026-05-11 21:05:38,014 - DEBUG - Reservation AAFEAF82 status set to 'Confirmed'
+2026-05-11 21:05:38,014 - DEBUG - calculate_total: base=250.0 discount=0.05 tax=0.0 total=237.5
+2026-05-11 21:05:38,014 - INFO - Reserva creada: AAFEAF82 — Reserva[AAFEAF82] david \u2192 Meeting Room A | Confirmed | $237.50
+2026-05-11 21:05:39,470 - DEBUG - calculate_total: base=250.0 discount=0.05 tax=0.0 total=237.5
+2026-05-11 21:05:39,470 - DEBUG - save_res() attempt finished
+2026-05-11 21:05:51,022 - DEBUG - Reservation AAFEAF82 status set to 'Rescheduled'
+2026-05-11 21:05:51,022 - INFO - Reserva actualizada: AAFEAF82
+2026-05-11 21:05:52,292 - DEBUG - calculate_total: base=250.0 discount=0.05 tax=0.0 total=237.5
+2026-05-11 21:05:52,292 - DEBUG - save_res() attempt finished
+2026-05-11 21:05:56,518 - INFO - Session closed by user.
+2026-05-11 21:06:03,542 - INFO - Login exitoso.
+2026-05-11 21:13:38,419 - INFO - Login exitoso.
+2026-05-11 21:19:29,317 - INFO - Login exitoso.
+2026-05-11 21:19:33,790 - INFO - [ResilienceTester] Processing operation 1: Uvier Salinas / Sala
+2026-05-11 21:19:33,791 - INFO - Reservation 09176EB3 confirmed
+2026-05-11 21:19:33,791 - DEBUG - calculate_total: base=250.0 discount=0.0 tax=0.0 total=250.0
+2026-05-11 21:19:33,791 - INFO - Reservation 09176EB3 successful. Cost: $250.00
+2026-05-11 21:19:33,791 - INFO - Reservation 09176EB3 processing attempt finished
+2026-05-11 21:19:33,792 - INFO - [ResilienceTester] Case 01: [OK] — Uvier Salinas | Room Service: Sala Simulación A ($50.00/hr) | Duration: 5 | Total: $250.00
+2026-05-11 21:19:33,792 - INFO - [ResilienceTester] Processing operation 2: Pepito Prueba / Asesoria
+2026-05-11 21:19:33,792 - ERROR - [ResilienceTester] Case 02: [ValidationError] — Cannot set email for client '3E4DFD4E': Invalid email format (expected: user@domain.tld)
+2026-05-11 21:19:33,793 - INFO - [ResilienceTester] Processing operation 3: Daniela Mora / Equipo
+2026-05-11 21:19:33,793 - ERROR - [ResilienceTester] Case 03: [ValidationError] — Duration must be positive (got -2.0)
+2026-05-11 21:19:33,793 - INFO - [ResilienceTester] Processing operation 4: Pancracio Gil / Sala
+2026-05-11 21:19:33,793 - INFO - Reservation 7CEE867A confirmed
+2026-05-11 21:19:33,793 - DEBUG - calculate_total: base=400.0 discount=0.0 tax=0.0 total=400.0
+2026-05-11 21:19:33,793 - INFO - Reservation 7CEE867A successful. Cost: $400.00
+2026-05-11 21:19:33,793 - INFO - Reservation 7CEE867A processing attempt finished
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Case 04: [OK] — Pancracio Gil | Room Service: Sala Simulación A ($50.00/hr) | Duration: 8 | Total: $400.00
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Processing operation 5: Nestor Lopez / Equipo
+2026-05-11 21:19:33,794 - ERROR - [ResilienceTester] Case 05: [UnexpectedError] — ValueError: could not convert string to float: 'abc'
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Processing operation 6: David Gomez / Asesoria
+2026-05-11 21:19:33,794 - INFO - Reservation 60D8F320 confirmed
+2026-05-11 21:19:33,794 - DEBUG - calculate_total: base=1440.0 discount=0.0 tax=0.0 total=1440.0
+2026-05-11 21:19:33,794 - INFO - Reservation 60D8F320 successful. Cost: $1440.00
+2026-05-11 21:19:33,794 - INFO - Reservation 60D8F320 processing attempt finished
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Case 06: [OK] — David Gomez | Consulting Service: Python Avanzado ($120.00/session) | Duration: 12 | Total: $1440.00
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Processing operation 7:  / Sala
+2026-05-11 21:19:33,794 - ERROR - [ResilienceTester] Case 07: [ValidationError] — Name must be a non-empty string
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Processing operation 8: Luciana Perez / Equipo
+2026-05-11 21:19:33,794 - INFO - Reservation A7D14F67 confirmed
+2026-05-11 21:19:33,794 - DEBUG - calculate_total: base=210.0 discount=0.0 tax=0.0 total=210.0
+2026-05-11 21:19:33,794 - INFO - Reservation A7D14F67 successful. Cost: $210.00
+2026-05-11 21:19:33,794 - INFO - Reservation A7D14F67 processing attempt finished
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Case 08: [OK] — Luciana Perez | Equipment Service: Laptop HP Sim ($30.00/day) | Duration: 7 | Total: $210.00
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Processing operation 9: Cliente X / Sala
+2026-05-11 21:19:33,794 - ERROR - [ResilienceTester] Case 09: [ValidationError] — Duration must be positive (got 0.0)
+2026-05-11 21:19:33,794 - INFO - [ResilienceTester] Processing operation 10: Final UNAD / Asesoria
+2026-05-11 21:19:33,794 - INFO - Reservation 93F55575 confirmed
+2026-05-11 21:19:33,794 - DEBUG - calculate_total: base=120.0 discount=0.0 tax=0.0 total=120.0
+2026-05-11 21:19:33,794 - INFO - Reservation 93F55575 successful. Cost: $120.00
+2026-05-11 21:19:33,794 - INFO - Reservation 93F55575 processing attempt finished
+2026-05-11 21:19:33,795 - INFO - [ResilienceTester] Case 10: [OK] — Final UNAD | Consulting Service: Python Avanzado ($120.00/session) | Duration: 1 | Total: $120.00
+2026-05-11 21:19:39,973 - INFO - [ResilienceTester] Processing operation 1: Uvier Salinas / Sala
+2026-05-11 21:19:39,974 - INFO - Reservation 122504A0 confirmed
+2026-05-11 21:19:39,974 - DEBUG - calculate_total: base=250.0 discount=0.0 tax=0.0 total=250.0
+2026-05-11 21:19:39,974 - INFO - Reservation 122504A0 successful. Cost: $250.00
+2026-05-11 21:19:39,974 - INFO - Reservation 122504A0 processing attempt finished
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Case 01: [OK] — Uvier Salinas | Room Service: Sala Simulación A ($50.00/hr) | Duration: 5 | Total: $250.00
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Processing operation 2: Pepito Prueba / Asesoria
+2026-05-11 21:19:39,974 - ERROR - [ResilienceTester] Case 02: [ValidationError] — Cannot set email for client '40227585': Invalid email format (expected: user@domain.tld)
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Processing operation 3: Daniela Mora / Equipo
+2026-05-11 21:19:39,974 - ERROR - [ResilienceTester] Case 03: [ValidationError] — Duration must be positive (got -2.0)
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Processing operation 4: Pancracio Gil / Sala
+2026-05-11 21:19:39,974 - INFO - Reservation 1884B0A0 confirmed
+2026-05-11 21:19:39,974 - DEBUG - calculate_total: base=400.0 discount=0.0 tax=0.0 total=400.0
+2026-05-11 21:19:39,974 - INFO - Reservation 1884B0A0 successful. Cost: $400.00
+2026-05-11 21:19:39,974 - INFO - Reservation 1884B0A0 processing attempt finished
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Case 04: [OK] — Pancracio Gil | Room Service: Sala Simulación A ($50.00/hr) | Duration: 8 | Total: $400.00
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Processing operation 5: Nestor Lopez / Equipo
+2026-05-11 21:19:39,974 - ERROR - [ResilienceTester] Case 05: [UnexpectedError] — ValueError: could not convert string to float: 'abc'
+2026-05-11 21:19:39,974 - INFO - [ResilienceTester] Processing operation 6: David Gomez / Asesoria
+2026-05-11 21:19:39,974 - INFO - Reservation 8A8BA09C confirmed
+2026-05-11 21:19:39,975 - DEBUG - calculate_total: base=1440.0 discount=0.0 tax=0.0 total=1440.0
+2026-05-11 21:19:39,975 - INFO - Reservation 8A8BA09C successful. Cost: $1440.00
+2026-05-11 21:19:39,975 - INFO - Reservation 8A8BA09C processing attempt finished
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Case 06: [OK] — David Gomez | Consulting Service: Python Avanzado ($120.00/session) | Duration: 12 | Total: $1440.00
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Processing operation 7:  / Sala
+2026-05-11 21:19:39,975 - ERROR - [ResilienceTester] Case 07: [ValidationError] — Name must be a non-empty string
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Processing operation 8: Luciana Perez / Equipo
+2026-05-11 21:19:39,975 - INFO - Reservation 5B6DD9CD confirmed
+2026-05-11 21:19:39,975 - DEBUG - calculate_total: base=210.0 discount=0.0 tax=0.0 total=210.0
+2026-05-11 21:19:39,975 - INFO - Reservation 5B6DD9CD successful. Cost: $210.00
+2026-05-11 21:19:39,975 - INFO - Reservation 5B6DD9CD processing attempt finished
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Case 08: [OK] — Luciana Perez | Equipment Service: Laptop HP Sim ($30.00/day) | Duration: 7 | Total: $210.00
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Processing operation 9: Cliente X / Sala
+2026-05-11 21:19:39,975 - ERROR - [ResilienceTester] Case 09: [ValidationError] — Duration must be positive (got 0.0)
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Processing operation 10: Final UNAD / Asesoria
+2026-05-11 21:19:39,975 - INFO - Reservation BFFF521D confirmed
+2026-05-11 21:19:39,975 - DEBUG - calculate_total: base=120.0 discount=0.0 tax=0.0 total=120.0
+2026-05-11 21:19:39,975 - INFO - Reservation BFFF521D successful. Cost: $120.00
+2026-05-11 21:19:39,975 - INFO - Reservation BFFF521D processing attempt finished
+2026-05-11 21:19:39,975 - INFO - [ResilienceTester] Case 10: [OK] — Final UNAD | Consulting Service: Python Avanzado ($120.00/session) | Duration: 1 | Total: $120.00
+2026-05-11 21:19:57,341 - INFO - [ResilienceTester] Processing operation 1: Uvier Salinas / Sala
+2026-05-11 21:19:57,342 - INFO - Reservation 2F0CF70A confirmed
+2026-05-11 21:19:57,342 - DEBUG - calculate_total: base=250.0 discount=0.0 tax=0.0 total=250.0
+2026-05-11 21:19:57,342 - INFO - Reservation 2F0CF70A successful. Cost: $250.00
+2026-05-11 21:19:57,342 - INFO - Reservation 2F0CF70A processing attempt finished
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Case 01: [OK] — Uvier Salinas | Room Service: Sala Simulación A ($50.00/hr) | Duration: 5 | Total: $250.00
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Processing operation 2: Pepito Prueba / Asesoria
+2026-05-11 21:19:57,342 - ERROR - [ResilienceTester] Case 02: [ValidationError] — Cannot set email for client 'CAA34A27': Invalid email format (expected: user@domain.tld)
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Processing operation 3: Daniela Mora / Equipo
+2026-05-11 21:19:57,342 - ERROR - [ResilienceTester] Case 03: [ValidationError] — Duration must be positive (got -2.0)
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Processing operation 4: Pancracio Gil / Sala
+2026-05-11 21:19:57,342 - INFO - Reservation 09698912 confirmed
+2026-05-11 21:19:57,342 - DEBUG - calculate_total: base=400.0 discount=0.0 tax=0.0 total=400.0
+2026-05-11 21:19:57,342 - INFO - Reservation 09698912 successful. Cost: $400.00
+2026-05-11 21:19:57,342 - INFO - Reservation 09698912 processing attempt finished
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Case 04: [OK] — Pancracio Gil | Room Service: Sala Simulación A ($50.00/hr) | Duration: 8 | Total: $400.00
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Processing operation 5: Nestor Lopez / Equipo
+2026-05-11 21:19:57,342 - ERROR - [ResilienceTester] Case 05: [UnexpectedError] — ValueError: could not convert string to float: 'abc'
+2026-05-11 21:19:57,342 - INFO - [ResilienceTester] Processing operation 6: David Gomez / Asesoria
+2026-05-11 21:19:57,343 - INFO - Reservation C4AF3E07 confirmed
+2026-05-11 21:19:57,343 - DEBUG - calculate_total: base=1440.0 discount=0.0 tax=0.0 total=1440.0
+2026-05-11 21:19:57,343 - INFO - Reservation C4AF3E07 successful. Cost: $1440.00
+2026-05-11 21:19:57,343 - INFO - Reservation C4AF3E07 processing attempt finished
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Case 06: [OK] — David Gomez | Consulting Service: Python Avanzado ($120.00/session) | Duration: 12 | Total: $1440.00
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Processing operation 7:  / Sala
+2026-05-11 21:19:57,343 - ERROR - [ResilienceTester] Case 07: [ValidationError] — Name must be a non-empty string
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Processing operation 8: Luciana Perez / Equipo
+2026-05-11 21:19:57,343 - INFO - Reservation 9B208832 confirmed
+2026-05-11 21:19:57,343 - DEBUG - calculate_total: base=210.0 discount=0.0 tax=0.0 total=210.0
+2026-05-11 21:19:57,343 - INFO - Reservation 9B208832 successful. Cost: $210.00
+2026-05-11 21:19:57,343 - INFO - Reservation 9B208832 processing attempt finished
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Case 08: [OK] — Luciana Perez | Equipment Service: Laptop HP Sim ($30.00/day) | Duration: 7 | Total: $210.00
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Processing operation 9: Cliente X / Sala
+2026-05-11 21:19:57,343 - ERROR - [ResilienceTester] Case 09: [ValidationError] — Duration must be positive (got 0.0)
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Processing operation 10: Final UNAD / Asesoria
+2026-05-11 21:19:57,343 - INFO - Reservation 3572472C confirmed
+2026-05-11 21:19:57,343 - DEBUG - calculate_total: base=120.0 discount=0.0 tax=0.0 total=120.0
+2026-05-11 21:19:57,343 - INFO - Reservation 3572472C successful. Cost: $120.00
+2026-05-11 21:19:57,343 - INFO - Reservation 3572472C processing attempt finished
+2026-05-11 21:19:57,343 - INFO - [ResilienceTester] Case 10: [OK] — Final UNAD | Consulting Service: Python Avanzado ($120.00/session) | Duration: 1 | Total: $120.00

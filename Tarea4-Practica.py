@@ -6,6 +6,8 @@
 # 1. David Andrés Gómez Castillo - 1.122.141.463
 # 2. Uvier Asdrubal Salinas Losada - 1.083.867.220
 # 3. Nestor Andres Lopez Salamanca - 1.083.913.882
+# 4. No participa
+# 5. No participa
 # ============================================
 
 from abc import ABC, abstractmethod
@@ -21,78 +23,93 @@ from datetime import datetime
 # CONFIGURACIÓN DEL SISTEMA Y LOGGER
 # ============================================
 
-LOG_FILE = "system.log"
+LOG_FILE         = "system.log"
 STATUS_PENDING   = "Pending"
 STATUS_CONFIRMED = "Confirmed"
 STATUS_CANCELLED = "Cancelled"
 
 _LOGIN_USER = "admin"
-_PASS_HASH  = hashlib.sha256("fj2026".encode()).hexdigest()
-
+_PASS_HASH  = hashlib.sha256("fj2026".encode()).hexdigest()             # Usuario : admin     contraseña: fj2026
 
 MAX_DURATION = 10_000.0
 
 logging.basicConfig(
     filename=LOG_FILE,
-    level=logging.INFO,
+    level=logging.DEBUG,                             
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 def log_info(message):    logging.info(message)
 def log_error(message):   logging.error(message)
 def log_warning(message): logging.warning(message)
+def log_debug(message):   logging.debug(message)    
 
 # ============================================
 # EXCEPCIONES PERSONALIZADAS
 # ============================================
 
 class SistemaError(Exception):
-    """Excepción base del sistema."""
+    
     pass
 
 class ValidationError(SistemaError):
+    
     pass
 
 class ServiceError(SistemaError):
+    
     pass
 
 class ReservationError(SistemaError):
+    
     pass
 
 # ============================================
 # VALIDADORES
 # ============================================
 
-
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 def validate_string(value, field):
+   
     if not isinstance(value, str) or not value.strip():
         raise ValidationError(f"{field} must be a non-empty string")
 
 def validate_email(value):
+    
     validate_string(value, "Email")
     if not _EMAIL_RE.match(value):
         raise ValidationError("Invalid email format (expected: user@domain.tld)")
 
-def validate_positive(value, field):
+
+def validate_positive_number(value, field):
     
     try:
         value = float(value)
-    except (TypeError, ValueError):
-        raise ValidationError(f"{field} must be a number")
+    except (TypeError, ValueError) as e:
+        raise ValidationError(f"{field} must be a number") from e   
     if value <= 0:
         raise ValidationError(f"{field} must be positive (got {value})")
+    return value
+
+def validate_duration(value, field):
+    
+    value = validate_positive_number(value, field)
     if value > MAX_DURATION:
         raise ValidationError(f"{field} exceeds maximum allowed value ({MAX_DURATION})")
     return value
+
+
+def validate_positive(value, field):
+    """Compatibilidad: valida número positivo con límite de duración."""
+    return validate_duration(value, field)
 
 # ============================================
 # GENERADOR DE IDs ÚNICOS
 # ============================================
 
-
 def generate_id():
+    
     return str(uuid.uuid4())[:8].upper()
 
 # ============================================
@@ -100,6 +117,7 @@ def generate_id():
 # ============================================
 
 class BaseEntity(ABC):
+    
     def __init__(self, id):
         if id is None:
             raise ValidationError("ID cannot be None")
@@ -109,11 +127,18 @@ class BaseEntity(ABC):
     def id(self):
         return self._id
 
+    
+    @abstractmethod
+    def __str__(self):
+        """Representación textual de la entidad. Obligatoria en subclases."""
+        pass
+
 # ============================================
 # CLASE CLIENTE
 # ============================================
 
 class Cliente(BaseEntity):
+    
     def __init__(self, id, name, email):
         super().__init__(id)
         self.name  = name
@@ -136,19 +161,28 @@ class Cliente(BaseEntity):
 
     @email.setter
     def email(self, value):
-        
-        validate_email(value)
+        try:
+            validate_email(value)
+        except ValidationError as e:
+            raise ValidationError(f"Cannot set email for client '{self._id}': {e}") from e  
         self._email = value.strip().lower()
+
+    def __str__(self):
+        return f"Cliente[{self._id}] {self._name} <{self._email}>"
+
+    def __repr__(self):
+        return f"Cliente(id={self._id!r}, name={self._name!r}, email={self._email!r})"
 
 # ============================================
 # CLASE ABSTRACTA SERVICIOS
 # ============================================
 
 class Servicio(BaseEntity, ABC):
+    
     def __init__(self, id, name, base_price):
         super().__init__(id)
         validate_string(name, "Service Name")
-        base_price = validate_positive(base_price, "Base Price")
+        base_price = validate_positive_number(base_price, "Base Price")  
         self._name       = name
         self._base_price = base_price
 
@@ -161,22 +195,30 @@ class Servicio(BaseEntity, ABC):
         return self._base_price
 
     def calculate_total(self, duration, discount=0.0, tax=0.0):
-       
+        
         if not (0.0 <= discount <= 1.0):
             raise ValidationError("Discount must be between 0.0 and 1.0")
         if not (0.0 <= tax <= 1.0):
             raise ValidationError("Tax must be between 0.0 and 1.0")
-        base = self.calculate_cost(duration)
+        base       = self.calculate_cost(duration)
         discounted = base * (1.0 - discount)
-        total = discounted * (1.0 + tax)
+        total      = discounted * (1.0 + tax)
+        log_debug(f"calculate_total: base={base} discount={discount} tax={tax} total={round(total,2)}")
         return round(total, 2)
 
     @abstractmethod
     def calculate_cost(self, duration):
+        
         pass
 
     @abstractmethod
     def describe(self):
+        
+        pass
+
+    
+    @abstractmethod
+    def __str__(self):
         pass
 
 # ============================================
@@ -184,45 +226,70 @@ class Servicio(BaseEntity, ABC):
 # ============================================
 
 class Sala(Servicio):
+    
+
     def calculate_cost(self, hours):
-        hours = validate_positive(hours, "Hours")
+        hours = validate_duration(hours, "Hours")   
         return round(self._base_price * hours, 2)
 
     def describe(self):
         return f"Room Service: {self._name} (${self._base_price:.2f}/hr)"
 
+    def __str__(self):
+        return f"Sala[{self._id}] {self._name} — ${self._base_price:.2f}/hr"
+
+    def __repr__(self):
+        return f"Sala(id={self._id!r}, name={self._name!r}, base_price={self._base_price})"
+
 
 class Equipo(Servicio):
+    
+
     def calculate_cost(self, days):
-        days = validate_positive(days, "Days")
+        days = validate_duration(days, "Days")
         return round(self._base_price * days, 2)
 
     def describe(self):
         return f"Equipment Service: {self._name} (${self._base_price:.2f}/day)"
 
+    def __str__(self):
+        return f"Equipo[{self._id}] {self._name} — ${self._base_price:.2f}/day"
+
+    def __repr__(self):
+        return f"Equipo(id={self._id!r}, name={self._name!r}, base_price={self._base_price})"
+
 
 class Asesoria(Servicio):
+    
+
     def calculate_cost(self, sessions):
-        sessions = validate_positive(sessions, "Sessions")
+        sessions = validate_duration(sessions, "Sessions")
         return round(self._base_price * sessions, 2)
 
     def describe(self):
         return f"Consulting Service: {self._name} (${self._base_price:.2f}/session)"
+
+    def __str__(self):
+        return f"Asesoria[{self._id}] {self._name} — ${self._base_price:.2f}/session"
+
+    def __repr__(self):
+        return f"Asesoria(id={self._id!r}, name={self._name!r}, base_price={self._base_price})"
 
 # ============================================
 # CLASE RESERVA
 # ============================================
 
 class Reserva:
+    
+
     def __init__(self, id_reserva, cliente, servicio, duration,
                  discount=0.0, tax=0.0):
-       
         if not isinstance(cliente, Cliente):
             raise ValidationError("Invalid client")
         if not isinstance(servicio, Servicio):
             raise ValidationError("Invalid service")
 
-        duration = validate_positive(duration, "Duration")
+        duration = validate_duration(duration, "Duration")
         if not (0.0 <= discount <= 1.0):
             raise ValidationError("Discount must be between 0.0 and 1.0")
         if not (0.0 <= tax <= 1.0):
@@ -236,6 +303,10 @@ class Reserva:
         self._tax       = tax
         self._status    = STATUS_PENDING
         self._date      = datetime.now()
+
+    # ------------------------------------------------------------------
+    # PROPERTIES
+    # ------------------------------------------------------------------
 
     @property
     def date(self):
@@ -261,7 +332,27 @@ class Reserva:
     def tax(self):
         return self._tax
 
+    
+    @property
+    def duration(self):
+        return self._duration
+
+   
+    def set_status(self, new_status):
+       
+        allowed = {STATUS_PENDING, STATUS_CONFIRMED, STATUS_CANCELLED,
+                   "Completed", "No show", "Rescheduled", "On hold", "Expired"}
+        if new_status not in allowed:
+            raise ValidationError(f"Status '{new_status}' is not allowed")
+        self._status = new_status
+        log_debug(f"Reservation {self.id_reserva} status set to '{new_status}'")
+
+    # ------------------------------------------------------------------
+    # OPERACIONES DE ESTADO
+    # ------------------------------------------------------------------
+
     def confirm(self):
+  
         if self._status != STATUS_PENDING:
             raise ReservationError(
                 f"Cannot confirm: current status is '{self._status}'"
@@ -270,13 +361,16 @@ class Reserva:
         log_info(f"Reservation {self.id_reserva} confirmed")
 
     def cancel(self):
+        
         if self._status == STATUS_CANCELLED:
             log_warning(f"Reservation {self.id_reserva} was already cancelled")
             raise ReservationError("Already cancelled")
-        self._status = STATUS_CANCELLED
-        log_warning(f"Reservation {self.id_reserva} cancelled (was {self._status})")
+        previous        = self._status          
+        self._status    = STATUS_CANCELLED
+        log_warning(f"Reservation {self.id_reserva} cancelled (was '{previous}')")
 
     def process(self):
+        
         try:
             if self._status == STATUS_CANCELLED:
                 raise ReservationError("Cannot process a cancelled reservation")
@@ -284,7 +378,7 @@ class Reserva:
                 raise ReservationError("Reservation already processed")
 
             self.confirm()
-            cost = self._servicio.calculate_total(
+            cost = self._servicio.calculate_total(    
                 self._duration,
                 discount=self._discount,
                 tax=self._tax
@@ -300,17 +394,145 @@ class Reserva:
 
         except Exception as e:
             log_error(f"Unexpected error in reservation {self.id_reserva}: {e}")
-            raise ReservationError("Processing failed") from e
+            raise ReservationError("Processing failed") from e  
 
         else:
-            log_info(f"Reservation {self.id_reserva} successful. Cost: {cost}")
+            log_info(f"Reservation {self.id_reserva} successful. Cost: ${cost:.2f}")
             return cost
 
         finally:
             log_info(f"Reservation {self.id_reserva} processing attempt finished")
 
+    
+    def __str__(self):
+        total = self._servicio.calculate_total(self._duration, self._discount, self._tax)
+        return (f"Reserva[{self.id_reserva}] {self._cliente.name} → "
+                f"{self._servicio.name} | {self._status} | ${total:.2f}")
+
+    def __repr__(self):
+        return (f"Reserva(id={self.id_reserva!r}, cliente={self._cliente.id!r}, "
+                f"servicio={self._servicio.id!r}, duration={self._duration}, "
+                f"status={self._status!r})")
+
 # ============================================
-# INTERFAZ GRÁFICA DE USUARIO (G.U.I v2.0)
+# MÓDULO DE RESILIENCIA 
+# ============================================
+
+class ResilienceTester:
+    
+
+    def __init__(self, logger):
+        self.logger = logger
+        self.report = []
+        self._last_report = []
+
+    def run_simulation(self, is_authenticated):
+       
+        if not is_authenticated:
+            raise PermissionError("Access Denied: Authentication required for stress tests.")
+
+        
+        servicios_test = [
+            Sala("SIM-S1",    "Sala Simulación A",   50.0),
+            Equipo("SIM-E1",  "Laptop HP Sim",       30.0),
+            Asesoria("SIM-A1","Python Avanzado",    120.0),
+        ]
+        type_map = {
+            "Sala":     servicios_test[0],
+            "Equipo":   servicios_test[1],
+            "Asesoria": servicios_test[2],
+        }
+
+       
+        casos = [
+            ("Uvier Salinas",   "uvier@unad.edu.co",    "5",   "Sala"),       # ✅ válido
+            ("Pepito Prueba",   "pepito_sin_arroba.com", "10",  "Asesoria"),   # ❌ email inválido
+            ("Daniela Mora",    "dani@gmail.com",        "-2",  "Equipo"),     # ❌ duración negativa
+            ("Pancracio Gil",   "pancracio@gmail.com",   "8",   "Sala"),       # ✅ válido
+            ("Nestor Lopez",    "nestor@unad.edu.co",    "abc", "Equipo"),     # ❌ duración no numérica
+            ("David Gomez",     "david@unad.edu.co",     "12",  "Asesoria"),   # ✅ válido
+            ("",                "anonimo@test.com",      "2",   "Sala"),       # ❌ nombre vacío
+            ("Luciana Perez",   "luciana@bio.com",       "7",   "Equipo"),     # ✅ válido
+            ("Cliente X",       "x@mail.com",            "0",   "Sala"),       # ❌ duración cero
+            ("Final UNAD",      "final@unad.edu.co",     "1",   "Asesoria"),   # ✅ válido
+        ]
+
+        exitos = 0
+        fallos = 0
+        self.report = []
+
+        # Retorna también los datos estructurados para la tabla de la GUI
+        structured = []
+
+        for i, (nom, em, dur, tip) in enumerate(casos, 1):
+            entry = {
+                "case":    i,
+                "name":    nom or "(vacío)",
+                "email":   em,
+                "dur":     dur,
+                "type":    tip,
+                "status":  "OK",
+                "cost":    "",
+                "error":   "",
+                "exc_type": "",
+            }
+            try:
+                log_info(f"[ResilienceTester] Processing operation {i}: {nom} / {tip}")
+
+            
+                cliente = Cliente(generate_id(), nom, em)
+
+               
+                servicio = type_map[tip]
+
+                
+                reserva = Reserva(generate_id(), cliente, servicio, float(dur))
+
+              
+                costo = reserva.process()
+
+                exitos += 1
+                entry["cost"]  = f"${costo:.2f}"
+                msg = (f"Case {i:02d}: [OK] — {cliente.name} | "
+                       f"{servicio.describe()} | Duration: {dur} | "
+                       f"Total: ${costo:.2f}")
+                self.report.append(msg)
+                log_info(f"[ResilienceTester] {msg}")
+
+            except ValidationError as e:
+                fallos += 1
+                entry["status"]   = "ERROR"
+                entry["exc_type"] = "ValidationError"
+                entry["error"]    = str(e)
+                msg = f"Case {i:02d}: [ValidationError] — {e}"
+                self.report.append(msg)
+                log_error(f"[ResilienceTester] {msg}")
+
+            except ReservationError as e:
+                fallos += 1
+                entry["status"]   = "ERROR"
+                entry["exc_type"] = "ReservationError"
+                entry["error"]    = str(e)
+                msg = f"Case {i:02d}: [ReservationError] — {e}"
+                self.report.append(msg)
+                log_error(f"[ResilienceTester] {msg}")
+
+            except Exception as e:
+                fallos += 1
+                entry["status"]   = "ERROR"
+                entry["exc_type"] = type(e).__name__
+                entry["error"]    = str(e)
+                msg = f"Case {i:02d}: [UnexpectedError] — {type(e).__name__}: {e}"
+                self.report.append(msg)
+                log_error(f"[ResilienceTester] {msg}")
+
+            structured.append(entry)
+
+        self._last_report = list(self.report)
+        return self.report, exitos, fallos, structured
+
+# ============================================
+# INTERFAZ GRÁFICA DE USUARIO (G.U.I v2.0.2)
 # ============================================
 
 COLORS = {
@@ -337,52 +559,6 @@ FONTS = {
     "small":      ("Segoe UI", 9),
     "mono":       ("Consolas", 9),
 }
-class ResilienceTester:
-    def __init__(self, logger):
-        self.logger = logger
-        self.report = []
-
-    def run_simulation(self, is_authenticated):
-        if not is_authenticated:
-            raise PermissionError("Access Denied: Authentication required for stress tests.")
-
-        casos = [
-            ("Uvier", "uvier@unad.edu.co", "5", "Sala"),
-            ("Pepito", "pepito_sin_arroba.com", "10", "Asesoria"),
-            ("Dani", "dani@gmail.com", "-2", "Equipo"),
-            ("Pancracio", "pancracio@gmail.com", "8", "Sala"),
-            ("Nestor", "nestor@unad.edu.co", "abc", "Equipo"),
-            ("David", "david@unad.edu.co", "12", "Asesoria"),
-            ("", "anonimo@test.com", "2", "Sala"),
-            ("Luciana", "luciana@bio.com", "7", "Equipo"),
-            ("Cliente X", "x@mail.com", "0", "Sala"),
-            ("Final UNAD", "final@unad.edu.co", "1", "Asesoria")
-        ]
-
-        exitos = 0
-        fallos = 0
-
-        for i, (nom, em, dur, tip) in enumerate(casos, 1):
-            try:
-                self.logger.info(f"Processing operation {i}...")
-                
-                if not nom: raise ValueError("Client name is required.")
-                
-                if "@" not in em: raise ValueError(f"Invalid email: {em}")
-                
-                val_dur = float(dur)
-                if val_dur <= 0: raise ValueError(f"Duration must be positive: {dur}")
-                
-                exitos += 1
-                self.report.append(f"Case {i}: [OK] - {nom} processed.")
-
-            except (ValueError, Exception) as e:
-                fallos += 1
-                error_msg = f"Case {i}: [ERROR] - {str(e)}"
-                self.logger.error(error_msg) 
-                self.report.append(error_msg)
-
-        return self.report, exitos, fallos
 
 class App:
     def __init__(self, root):
@@ -394,18 +570,41 @@ class App:
 
         self._apply_styles()
 
-        self.clientes = []
-        self.servicios = [
-            Sala("S001",    "Meeting Room A",   50.0),
-            Equipo("E001",  "Projector 4K",     25.0),
-            Asesoria("A001","Java Specialist", 100.0),
+        self.clientes    = []
+        self.servicios   = [
+            Sala("S001",     "Meeting Room A",   50.0),
+            Equipo("E001",   "Projector 4K",     25.0),
+            Asesoria("A001", "Java Specialist", 100.0),
         ]
         self.current_user = None
-        self.reservas = []
+        self.reservas     = []
+        self._last_report = []   
 
         self._login_binding = None
 
         self.build_login()
+
+    # ------------------------------------------------------------------
+    # HELPERS
+    # ------------------------------------------------------------------
+
+    def _system_summary(self):
+        
+        confirmed = sum(1 for r in self.reservas if r.status == STATUS_CONFIRMED)
+        revenue   = 0.0
+        for r in self.reservas:
+            if r.status == STATUS_CONFIRMED:
+                try:
+                    revenue += r.servicio.calculate_total(r.duration, r.discount, r.tax)
+                except Exception as e:
+                    log_warning(f"Could not compute revenue for {r.id_reserva}: {e}")
+        return {
+            "clients":      len(self.clientes),
+            "services":     len(self.servicios),
+            "reservations": len(self.reservas),
+            "confirmed":    confirmed,
+            "revenue":      round(revenue, 2),
+        }
 
     # ------------------------------------------------------------------
     # ESTILOS
@@ -588,6 +787,16 @@ class App:
         return f
 
     # ------------------------------------------------------------------
+    #  método logout
+    # ------------------------------------------------------------------
+
+    def _logout(self):
+        
+        self.current_user = None
+        log_info("Session closed by user.")
+        self.build_login()
+
+    # ------------------------------------------------------------------
     # LOGIN
     # ------------------------------------------------------------------
 
@@ -635,7 +844,7 @@ class App:
                      relx=0.5, rely=0.96, anchor="center")
 
     # ------------------------------------------------------------------
-    # VENTANA PRINCIPAL
+    # VENTANA PRINCIPAL  
     # ------------------------------------------------------------------
 
     def build_main_window(self):
@@ -648,10 +857,13 @@ class App:
         stats = tk.Frame(self.root, bg=COLORS["bg"], pady=20)
         stats.pack(fill="x", padx=32)
 
+        summary = self._system_summary()  
+
         for count, label in [
-            (len(self.clientes),  "Clients"),
-            (len(self.servicios), "Services"),
-            (len(self.reservas),  "Reservations"),
+            (summary["clients"],      "Clients"),
+            (summary["services"],     "Services"),
+            (summary["reservations"], "Reservations"),
+            (f"${summary['revenue']:,.2f}", "Confirmed Revenue"),  
         ]:
             self._status_badge(stats, count, label).pack(side="left", padx=10)
 
@@ -660,13 +872,13 @@ class App:
         test_frame = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
         test_frame.pack(fill="x", padx=34)
         self._make_button(
-            test_frame, 
-            "🛠️ Run Resilience Test (Robust System)", 
+            test_frame,
+            "🛠️ Run Resilience Test (Robust System)",
             self.test_system_resilience,
-            style="secondary", 
+            style="secondary",
             width=40
         ).pack(side="left")
-        
+
         nav = tk.Frame(self.root, bg=COLORS["bg"])
         nav.pack(fill="x", padx=28)
 
@@ -698,15 +910,18 @@ class App:
         self._make_button(btn_row, "▶ Run", self.test_system_resilience,
                           style="secondary", width=9).pack(side="left", padx=(0, 6))
         self._make_button(btn_row, "📊 Report", self.show_resilience_report,
-                          style="secondary", width=10).pack(side="left")
+                          style="secondary", width=10).pack(side="left") 
 
         footer = tk.Frame(self.root, bg=COLORS["bg"])
         footer.pack(side="bottom", fill="x", padx=32, pady=12)
         tk.Label(footer, text="© Software FJ  ·  Programación, grupo 288.",
-                 font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="right")
+                 font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left")
+        # FIX #18: botón de logout
+        self._make_button(footer, "⏻ Logout", self._logout,
+                          style="secondary", width=10).pack(side="right")
 
     # ------------------------------------------------------------------
-    # CLIENTES
+    # CLIENTES  
     # ------------------------------------------------------------------
 
     def manage_clients(self):
@@ -729,18 +944,25 @@ class App:
         form_card.columnconfigure(1, weight=1)
 
         def add():
+            new_id = generate_id()
             try:
-                new_id = generate_id()
                 c = Cliente(new_id, ent_name.get(), ent_email.get())
+            except ValidationError as e:
+                log_error(f"Error registering client: {e}")
+                messagebox.showerror("Validation Error", str(e))
+            except Exception as e:
+                log_error(f"Unexpected error registering client: {e}")
+                messagebox.showerror("Error", f"Unexpected error: {e}")
+            else:
+                
                 self.clientes.append(c)
                 log_info(f"Client {c.name} registered (ID: {c.id}).")
                 messagebox.showinfo("Success", f"Client '{c.name}' registered.\nID: {c.id}")
+                self.manage_clients()
+            finally:
+                
                 ent_name.delete(0, tk.END)
                 ent_email.delete(0, tk.END)
-                self.manage_clients()
-            except Exception as e:
-                log_error(f"Error registering client: {e}")
-                messagebox.showerror("Validation Error", str(e))
 
         self._make_button(form_card, "Register Client", add, style="primary", width=22).grid(
             row=3, column=0, columnspan=2, pady=(14, 0), sticky="ew")
@@ -767,7 +989,7 @@ class App:
                           style="secondary", width=18).pack(side="left")
 
     # ------------------------------------------------------------------
-    # SERVICIOS
+    # SERVICIOS  
     # ------------------------------------------------------------------
 
     def manage_services(self):
@@ -785,57 +1007,64 @@ class App:
         form_card.pack(side="left", fill="y", padx=(0, 12))
 
         lbl_form = tk.Label(form_card, text="SERVICE DETAILS", font=("Segoe UI", 8, "bold"),
-                          bg=COLORS["surface"], fg=COLORS["text_dim"])
+                            bg=COLORS["surface"], fg=COLORS["text_dim"])
         lbl_form.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
 
-        ent_sname  = self._make_entry(form_card,   "Service Name", row=1)
+        ent_sname  = self._make_entry(form_card,   "Service Name",  row=1)
         ent_sprice = self._make_entry(form_card,   "Base Price ($)", row=2)
         cb_stype   = self._make_combobox(form_card, "Type", row=3,
                                          values=["Room", "Equipment", "Consulting"])
-
         form_card.columnconfigure(1, weight=1)
+
+        
+        display_to_type = {
+            "🏢 Room":        "Room",
+            "🖥 Equipment":   "Equipment",
+            "💼 Consulting":  "Consulting",
+        }
+        type_map = {"Room": Sala, "Equipment": Equipo, "Consulting": Asesoria}
 
         def save_service():
             try:
-                name = ent_sname.get()
-                price = validate_positive(ent_sprice.get(), "Base Price")
+                name  = ent_sname.get()
+                price = validate_positive_number(ent_sprice.get(), "Base Price")
                 stype = cb_stype.get()
-                
+
                 if self._editing_id is None:
-                    max_id = 0
-                    if self.servicios:
-                        max_id = max(int(s.id) for s in self.servicios)
-                    
-                    new_id = str(max_id + 1)
-                    type_map = {"Room": Sala, "Equipment": Equipo, "Consulting": Asesoria}
+                    new_id = generate_id()  
                     s = type_map[stype](new_id, name, price)
                     self.servicios.append(s)
-                    log_info(f"Service {name} created with ID {new_id}.")
+                    log_info(f"Service '{name}' created with ID {new_id}.")
                 else:
                     for i, s in enumerate(self.servicios):
                         if str(s.id) == self._editing_id:
-                            type_map = {"Room": Sala, "Equipment": Equipo, "Consulting": Asesoria}
                             self.servicios[i] = type_map[stype](s.id, name, price)
                             break
                     log_info(f"Service ID {self._editing_id} updated.")
                     self._editing_id = None
-                
-                messagebox.showinfo("Success", "Operation completed successfully.")
-                self.manage_services()
-                
+
+            except ValidationError as e:
+                log_error(f"Service validation failed: {e}")
+                messagebox.showerror("Validation Error", str(e))
             except Exception as e:
                 log_error(f"Service operation failed: {e}")
                 messagebox.showerror("Error", str(e))
+            else:
+                # FIX #9: else solo si no hubo error
+                messagebox.showinfo("Success", "Operation completed successfully.")
+                self.manage_services()
+            finally:
+                log_debug("save_service() attempt finished")
 
         def delete_service():
             selected = tree.selection()
             if not selected:
                 messagebox.showwarning("Selection", "Please select a service to delete.")
                 return
-            
-            item = tree.item(selected)
-            s_id = str(item['values'][0])
-            
+
+            item  = tree.item(selected)
+            s_id  = str(item['values'][0])
+
             if messagebox.askyesno("Confirm", f"Delete service ID {s_id}?"):
                 self.servicios = [s for s in self.servicios if str(s.id) != s_id]
                 log_info(f"Service ID {s_id} deleted.")
@@ -844,19 +1073,21 @@ class App:
 
         def on_select(event):
             selected = tree.selection()
-            if not selected: return
-            
-            item = tree.item(selected)
+            if not selected:
+                return
+
+            item             = tree.item(selected)
             self._editing_id = str(item['values'][0])
-            
+
             ent_sname.delete(0, tk.END)
             ent_sname.insert(0, item['values'][1])
             ent_sprice.delete(0, tk.END)
             ent_sprice.insert(0, str(item['values'][2]).replace('$', ''))
+
             
-            raw_type = item['values'][3].split()[-1] 
+            raw_type = display_to_type.get(item['values'][3], "Room")
             cb_stype.set(raw_type)
-            
+
             btn_save.config(text="Update Service", bg=COLORS["accent2"])
             lbl_form.config(text=f"EDITING ID: {self._editing_id}", fg=COLORS["accent"])
 
@@ -877,13 +1108,13 @@ class App:
 
         cols   = ("ID", "Name", "Base Price", "Type")
         labels = ("ID", "Name", "Base Price / Unit", "Type")
-        tree_frame, tree = self._make_treeview(list_card, cols, labels, [40, 190, 140, 130], height=10)
+        tree_frame, tree = self._make_treeview(list_card, cols, labels, [80, 190, 140, 130], height=10)
         tree_frame.pack(fill="both", expand=True)
 
         tree.bind("<<TreeviewSelect>>", on_select)
 
         for i, s in enumerate(self.servicios):
-            tag = "even" if i % 2 == 0 else "odd"
+            tag  = "even" if i % 2 == 0 else "odd"
             tipo = type_icons.get(s.__class__.__name__, s.__class__.__name__)
             tree.insert("", tk.END, values=(s.id, s.name, f"${s.base_price:.2f}", tipo), tags=(tag,))
 
@@ -893,7 +1124,7 @@ class App:
                           style="secondary", width=18).pack(side="left")
 
     # ------------------------------------------------------------------
-    # RESERVAS
+    # RESERVAS  
     # ------------------------------------------------------------------
 
     def manage_reservations(self):
@@ -915,7 +1146,7 @@ class App:
         form_card.pack(side="left", fill="y", padx=(0, 12))
 
         lbl_form = tk.Label(form_card, text="RESERVATION DETAILS", font=("Segoe UI", 8, "bold"),
-                          bg=COLORS["surface"], fg=COLORS["text_dim"])
+                            bg=COLORS["surface"], fg=COLORS["text_dim"])
         lbl_form.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
 
         cli_labels = [f"{c.name} ({c.id})" for c in self.clientes]
@@ -926,63 +1157,80 @@ class App:
         ent_dur = self._make_entry(form_card,    "Duration (Hours)", row=3)
 
         discount_map = {
-            "No descuento 0%": 0.0,
-            "Clientes frecuentes 5%": 0.05,
-            "Mayorista 8%": 0.08,
-            "Proveedores 10%": 0.10,
-            "Empresas con convenio 12%": 0.12,
-            "Trabajadores internos 15%": 0.15,
-            "Cortesia total 100%": 1.0
+            "No descuento 0%":            0.0,
+            "Clientes frecuentes 5%":     0.05,
+            "Mayorista 8%":               0.08,
+            "Proveedores 10%":            0.10,
+            "Empresas con convenio 12%":  0.12,
+            "Trabajadores internos 15%":  0.15,
+            "Cortesia total 100%":        1.0,
         }
-        cb_dis = self._make_combobox(form_card, "Discount Type", row=4, values=list(discount_map.keys()))
+        cb_dis  = self._make_combobox(form_card, "Discount Type", row=4, values=list(discount_map.keys()))
         cb_dis.current(0)
 
         status_options = [
-            "Pending", "Confirmed", "Cancelled", "Completed", 
-            "No show", "Rescheduled", "On hold", "Expired"
+            STATUS_PENDING, STATUS_CONFIRMED, STATUS_CANCELLED,
+            "Completed", "No show", "Rescheduled", "On hold", "Expired"
         ]
         cb_stat = self._make_combobox(form_card, "Status", row=5, values=status_options)
         cb_stat.current(0)
 
         def save_res():
             try:
-                dur = float(ent_dur.get())
-                cli_id = cb_cli.get().split("(")[-1].rstrip(")")
-                ser_id = cb_ser.get().split("(")[-1].rstrip(")")
-
-                cli = next((c for c in self.clientes if str(c.id) == cli_id), None)
-                ser = next((s for s in self.servicios if str(s.id) == ser_id), None)
+                dur          = float(ent_dur.get())
+                cli_id       = cb_cli.get().split("(")[-1].rstrip(")")
+                ser_id       = cb_ser.get().split("(")[-1].rstrip(")")
                 discount_val = discount_map[cb_dis.get()]
                 selected_status = cb_stat.get()
 
+               
+                cli = next((c for c in self.clientes if str(c.id) == cli_id), None)
+                ser = next((s for s in self.servicios if str(s.id) == ser_id), None)
+                if cli is None:
+                    raise ValidationError(f"Client not found: {cli_id}")
+                if ser is None:
+                    raise ValidationError(f"Service not found: {ser_id}")
+
                 if self._editing_res_id is None:
                     new_id = generate_id()
-                    res = Reserva(new_id, cli, ser, dur, discount=discount_val)
-                    res._status = selected_status 
+                    res    = Reserva(new_id, cli, ser, dur, discount=discount_val)
+                    # FIX #6: usar set_status() en vez de asignación directa a _status
+                    res.set_status(selected_status)
                     self.reservas.append(res)
-                    log_info(f"Reserva creada: {new_id}")
+                    log_info(f"Reserva creada: {new_id} — {res}")
                 else:
                     for i, r in enumerate(self.reservas):
                         if str(r.id_reserva) == self._editing_res_id:
                             updated_res = Reserva(r.id_reserva, cli, ser, dur, discount=discount_val)
-                            updated_res._status = selected_status
+                            # FIX #6: usar set_status() en vez de asignación directa a _status
+                            updated_res.set_status(selected_status)
                             self.reservas[i] = updated_res
                             break
                     log_info(f"Reserva actualizada: {self._editing_res_id}")
                     self._editing_res_id = None
 
+            except (ValidationError, ReservationError) as e:
+                log_error(f"Error en reservas: {e}")
+                messagebox.showerror("Validation Error", str(e))
+            except ValueError:
+                log_error("Duration value is not a valid number")
+                messagebox.showerror("Error", "Duration must be a valid number.")
+            except Exception as e:
+                log_error(f"Unexpected error en reservas: {e}")
+                messagebox.showerror("Error", f"Could not save: {e}")
+            else:
+                # FIX #9: mensaje solo si no hubo error
                 messagebox.showinfo("Success", "Reservation saved successfully.")
                 self.manage_reservations()
-            except Exception as e:
-                log_error(f"Error en reservas: {e}")
-                messagebox.showerror("Error", f"Could not save: {e}")
+            finally:
+                log_debug("save_res() attempt finished")
 
         def delete_res():
             selected = tree.selection()
             if not selected:
                 messagebox.showwarning("Selection", "Please select a reservation to delete.")
                 return
-            item = tree.item(selected)
+            item   = tree.item(selected)
             res_id = str(item['values'][0])
             if messagebox.askyesno("Confirm", f"Delete reservation {res_id}?"):
                 self.reservas = [r for r in self.reservas if str(r.id_reserva) != res_id]
@@ -992,32 +1240,35 @@ class App:
 
         def on_select(event):
             selected = tree.selection()
-            if not selected: return
-            item = tree.item(selected)
+            if not selected:
+                return
+            item                 = tree.item(selected)
             self._editing_res_id = str(item['values'][0])
-            
-            res_actual = next((r for r in self.reservas if str(r.id_reserva) == self._editing_res_id), None)
-            
+
+            res_actual = next(
+                (r for r in self.reservas if str(r.id_reserva) == self._editing_res_id), None
+            )
+
             if res_actual:
                 ent_dur.delete(0, tk.END)
-                ent_dur.insert(0, str(res_actual._duration))
-                
+                ent_dur.insert(0, str(res_actual.duration))   
+
                 for i, label in enumerate(cli_labels):
                     if f"({res_actual.cliente.id})" in label:
                         cb_cli.current(i)
-                
+
                 for i, label in enumerate(ser_labels):
                     if f"({res_actual.servicio.id})" in label:
                         cb_ser.current(i)
-                
+
                 for i, (key, val) in enumerate(discount_map.items()):
                     if val == res_actual.discount:
                         cb_dis.current(i)
-                
+
                 if res_actual.status in status_options:
                     idx = status_options.index(res_actual.status)
                     cb_stat.current(idx)
-            
+
             btn_save.config(text="Update Reservation", bg=COLORS["accent2"])
             lbl_form.config(text=f"EDITING ID: {self._editing_res_id}", fg=COLORS["accent"])
 
@@ -1030,20 +1281,23 @@ class App:
         list_card = tk.Frame(body, bg=COLORS["surface"], padx=16, pady=16)
         list_card.pack(side="left", fill="both", expand=True)
 
-        cols = ("ID", "Client", "Service", "Status", "Hours", "Discount %", "Total Payment")
+        cols      = ("ID", "Client", "Service", "Status", "Hours", "Discount %", "Total Payment")
         tree_frame, tree = self._make_treeview(list_card, cols, cols, [60, 100, 100, 80, 60, 90, 100])
         tree_frame.pack(fill="both", expand=True)
         tree.bind("<<TreeviewSelect>>", on_select)
 
         for r in self.reservas:
-            precio_hora = getattr(r.servicio, '_base_price', 0)
-            subtotal = precio_hora * r._duration
-            total_final = subtotal * (1 - r.discount)
-            pct_display = f"{int(r.discount * 100)}%"
             
+            try:
+                total_final = r.servicio.calculate_total(r.duration, r.discount, r.tax)
+            except Exception as e:
+                log_warning(f"Could not compute total for {r.id_reserva}: {e}")
+                total_final = 0.0
+
+            pct_display = f"{int(r.discount * 100)}%"
             tree.insert("", tk.END, values=(
-                r.id_reserva, r.cliente.name, r.servicio.name, 
-                r.status, r._duration, pct_display, f"${total_final:,.2f}"
+                r.id_reserva, r.cliente.name, r.servicio.name,
+                r.status, r.duration, pct_display, f"${total_final:,.2f}"
             ))
 
         bottom = tk.Frame(self.root, bg=COLORS["bg"], pady=10)
@@ -1051,33 +1305,182 @@ class App:
         self._make_button(bottom, "← Back to Menu", self.build_main_window,
                           style="secondary", width=18).pack(side="left")
 
-
-
+    # ------------------------------------------------------------------
+    # RESILIENCIA  
+    # ------------------------------------------------------------------
 
     def test_system_resilience(self):
+        
         if not hasattr(self, 'current_user') or self.current_user is None:
             return
 
         try:
             tester = ResilienceTester(logging.getLogger())
-            report, ok, fails = tester.run_simulation(True)
-            resumen = f"Resilience Simulation Finished.\n\nSuccess: {ok}\nControlled Failures: {fails}"
-            messagebox.showinfo("Engineering System Report", 
-                                f"{'\n'.join(report)}\n\n{resumen}")
+            report, ok, fails, structured = tester.run_simulation(True)
+            self._last_report    = report
+            self._last_structured = structured
+            self._show_resilience_window(ok, fails, structured)
 
+        except PermissionError as e:
+            log_error(f"Permission denied en resiliencia: {e}")
+            messagebox.showerror("Access Denied", str(e))
         except Exception as e:
-            logging.error(f"Error crítico en el módulo de resiliencia: {e}")
-            messagebox.showerror("System Error", "An unexpected failure occurred. Please check system.log.")
-            
+            log_error(f"Error crítico en el módulo de resiliencia: {e}")
+            messagebox.showerror("System Error",
+                                 "An unexpected failure occurred. Please check system.log.")
+
+    def _show_resilience_window(self, ok, fails, structured):
+        """Abre una ventana dedicada que muestra la tabla de resultados con colores por estado."""
+
+        win = tk.Toplevel(self.root)
+        win.title("🧪 Resilience Test — Results")
+        win.geometry("980x580")
+        win.minsize(860, 480)
+        win.configure(bg=COLORS["bg"])
+        win.grab_set()
+
+        # --- Cabecera ---
+        hdr = tk.Frame(win, bg=COLORS["surface"], pady=12)
+        hdr.pack(fill="x")
+        tk.Label(hdr, text="🧪  Resilience Test Report",
+                 font=FONTS["title"], bg=COLORS["surface"], fg=COLORS["text"]).pack(side="left", padx=24)
+        tk.Label(hdr, text=datetime.now().strftime("%Y-%m-%d  %H:%M:%S"),
+                 font=FONTS["small"], bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(side="right", padx=24)
+        tk.Frame(win, bg=COLORS["accent"], height=2).pack(fill="x")
+
+        # --- Badges de resumen ---
+        total  = ok + fails
+        pct_ok = int((ok / total) * 100) if total else 0
+
+        summary_bar = tk.Frame(win, bg=COLORS["bg"], pady=14)
+        summary_bar.pack(fill="x", padx=24)
+
+        for val, lbl, color in [
+            (total,          "Total Cases",          COLORS["accent"]),
+            (ok,             "✅  Passed",            COLORS["success"]),
+            (fails,          "❌  Failed",            COLORS["danger"]),
+            (f"{pct_ok}%",   "Pass Rate",            COLORS["warning"]),
+        ]:
+            badge = tk.Frame(summary_bar, bg=COLORS["surface2"], padx=18, pady=8)
+            badge.pack(side="left", padx=6)
+            tk.Label(badge, text=str(val), font=("Segoe UI", 20, "bold"),
+                     bg=COLORS["surface2"], fg=color).pack()
+            tk.Label(badge, text=lbl, font=FONTS["small"],
+                     bg=COLORS["surface2"], fg=COLORS["text_dim"]).pack()
+
+        # --- Barra de progreso coloreada ---
+        bar_frame = tk.Frame(win, bg=COLORS["bg"], pady=4)
+        bar_frame.pack(fill="x", padx=24)
+
+        canvas = tk.Canvas(bar_frame, height=10, bg=COLORS["surface2"],
+                           highlightthickness=0, bd=0)
+        canvas.pack(fill="x")
+        canvas.update_idletasks()
+        bar_w = canvas.winfo_width() or 900
+        fill_w = int(bar_w * pct_ok / 100)
+        canvas.create_rectangle(0, 0, fill_w, 10,
+                                 fill=COLORS["success"] if pct_ok >= 60 else COLORS["danger"],
+                                 outline="")
+
+        # --- Tabla de resultados ---
+        table_frame = tk.Frame(win, bg=COLORS["surface"], padx=16, pady=12)
+        table_frame.pack(fill="both", expand=True, padx=24, pady=(8, 0))
+
+        tk.Label(table_frame, text="OPERATION DETAILS",
+                 font=("Segoe UI", 8, "bold"),
+                 bg=COLORS["surface"], fg=COLORS["text_dim"]).pack(anchor="w", pady=(0, 6))
+
+        cols   = ("Case", "Client", "Email", "Duration", "Service", "Result", "Cost / Error")
+        widths = [46, 110, 170, 68, 88, 56, 240]
+
+        style = ttk.Style()
+        style.configure("Resilience.Treeview",
+            background=COLORS["surface"],
+            foreground=COLORS["text"],
+            fieldbackground=COLORS["surface"],
+            rowheight=28,
+            borderwidth=0,
+            relief="flat",
+            font=FONTS["mono"],
+        )
+        style.configure("Resilience.Treeview.Heading",
+            background=COLORS["surface2"],
+            foreground=COLORS["accent"],
+            font=FONTS["label_bold"],
+            relief="flat",
+            borderwidth=0,
+        )
+        style.map("Resilience.Treeview",
+            background=[("selected", COLORS["accent2"])],
+            foreground=[("selected", COLORS["text"])],
+        )
+
+        tf = tk.Frame(table_frame, bg=COLORS["surface"])
+        tf.pack(fill="both", expand=True)
+
+        sb = ttk.Scrollbar(tf, style="Custom.Vertical.TScrollbar")
+        tree = ttk.Treeview(tf, columns=cols, show="headings",
+                            height=10, style="Resilience.Treeview",
+                            yscrollcommand=sb.set)
+        sb.config(command=tree.yview)
+
+        for col, w in zip(cols, widths):
+            tree.heading(col, text=col)
+            tree.column(col, width=w, anchor="center", minwidth=w)
+
+        # Colores diferenciados por resultado
+        tree.tag_configure("ok",    background="#0d2b1f", foreground=COLORS["success"])
+        tree.tag_configure("error", background="#2b0d0d", foreground=COLORS["danger"])
+
+        for entry in structured:
+            tag      = "ok" if entry["status"] == "OK" else "error"
+            result   = "✅  OK" if entry["status"] == "OK" else f"❌  {entry['exc_type']}"
+            detail   = entry["cost"] if entry["status"] == "OK" else entry["error"]
+            tree.insert("", tk.END, tags=(tag,), values=(
+                f"#{entry['case']:02d}",
+                entry["name"],
+                entry["email"],
+                entry["dur"],
+                entry["type"],
+                result,
+                detail,
+            ))
+
+        sb.pack(side="right", fill="y")
+        tree.pack(side="left", fill="both", expand=True)
+
+        # --- Pie de ventana con botón cerrar ---
+        footer = tk.Frame(win, bg=COLORS["bg"], pady=10)
+        footer.pack(fill="x", padx=24)
+        tk.Label(footer,
+                 text=f"All errors were captured and logged to  {LOG_FILE}",
+                 font=FONTS["small"], bg=COLORS["bg"], fg=COLORS["text_dim"]).pack(side="left")
+        self._make_button(footer, "✕  Close", win.destroy,
+                          style="secondary", width=12).pack(side="right")
+
+   
+    def show_resilience_report(self):
+        
+        if not self._last_report:
+            messagebox.showinfo("Report", "No resilience test has been run yet.\nClick '▶ Run' first.")
+            return
+        structured = getattr(self, '_last_structured', [])
+        if structured:
+            ok    = sum(1 for e in structured if e["status"] == "OK")
+            fails = sum(1 for e in structured if e["status"] != "OK")
+            self._show_resilience_window(ok, fails, structured)
+        else:
+            messagebox.showinfo("Last Resilience Report", "\n".join(self._last_report))
+
 # ============================================
 # FUNCIÓN PRINCIPAL
 # ============================================
 
 def main():
+    
     root = tk.Tk()
-    app = App(root)
+    app  = App(root)
     root.mainloop()
-
 
 # ============================================
 # EJECUCIÓN
